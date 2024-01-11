@@ -5,7 +5,7 @@
    "projectType": "application",
    "targets": {
       "test": {
-         "executor": "@plugins-nx/vitest:test",
+         "executor": "@nx/vite:test",
          "options": {}
       }
    },
