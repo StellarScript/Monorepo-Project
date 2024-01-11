@@ -9,10 +9,10 @@ export default defineConfig({
          dir: '../../node_modules/.vitest',
       },
       environment: 'node',
-      include: ['test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+      include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {
-         reportsDirectory: '../../coverage/apps/cdk',
+         reportsDirectory: '../../coverage/libs/construct',
          provider: 'v8',
       },
    },
