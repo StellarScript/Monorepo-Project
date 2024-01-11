@@ -1,0 +1,51 @@
+import type { Construct } from 'constructs';
+import type { IIpAddresses, IVpc } from 'aws-cdk-lib/aws-ec2';
+
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { IpAddresses, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Vpc as VpcConstruct, VpcProps as VpcConstructProps } from 'aws-cdk-lib/aws-ec2';
+import { Parameter } from './paramter';
+
+export interface VpcProps extends Partial<VpcConstructProps> {
+   ipAddresses?: IIpAddresses;
+}
+
+export class Vpc extends VpcConstruct {
+   static readonly vpcName = 'default-vpc';
+   static readonly parameterName = '/vpc/id';
+
+   constructor(scope: Construct, id: string, props: VpcProps) {
+      super(scope, id, {
+         subnetConfiguration: [
+            {
+               cidrMask: 24,
+               name: 'public',
+               subnetType: SubnetType.PUBLIC,
+            },
+            {
+               cidrMask: 24,
+               name: 'private',
+               subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+            },
+            {
+               cidrMask: 28,
+               name: 'isolated',
+               subnetType: SubnetType.PRIVATE_ISOLATED,
+            },
+         ],
+         ...props,
+      });
+
+      new StringParameter(this, 'VpcId', {
+         stringValue: this.vpcId,
+         parameterName: Vpc.parameterName,
+      });
+   }
+
+   public static vpcLookup(scope: Construct, id: string): IVpc {
+      return Vpc.fromLookup(scope, id, {
+         vpcName: Vpc.vpcName,
+         vpcId: Parameter.stringValue(scope, Vpc.parameterName),
+      });
+   }
+}
