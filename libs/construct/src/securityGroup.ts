@@ -1,5 +1,6 @@
 import type { Construct } from 'constructs';
 import { ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import type { IVpc } from 'aws-cdk-lib/aws-ec2';
 import type { Vpc } from './vpc';
 
 import {
@@ -8,7 +9,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 
 export interface SecurityGroupProps extends Partial<SecurityGroupConstructProps> {
-   vpc: Vpc;
+   vpc: Vpc | IVpc;
    exportName?: string;
 }
 
@@ -25,7 +26,7 @@ export class SecurityGroup extends SecurityGroupConstruct {
    public static securityGroupLookup(
       scope: Construct,
       id: string,
-      vpc: Vpc,
+      vpc: IVpc,
       securityGroupName?: string
    ): ISecurityGroup {
       const name = securityGroupName || SecurityGroup.securityGroupName;

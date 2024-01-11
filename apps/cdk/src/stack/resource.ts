@@ -4,18 +4,18 @@ import type { IHostedZone } from 'aws-cdk-lib/aws-route53';
 
 import { IpAddresses } from 'aws-cdk-lib/aws-ec2';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
-import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { ARecord, PublicHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 
 import config from '@appify/shared/config';
 import { Vpc } from '@appify/construct/vpc';
 import { SecurityGroup } from '@appify/construct/securityGroup';
+import { Loadbalancer } from '@appify/construct/loadBalancer';
 
 export class ResourceStack extends Stack {
    public readonly vpc: Vpc;
    public readonly zone: IHostedZone;
 
-   public readonly loadBalancer: ApplicationLoadBalancer;
+   public readonly loadBalancer: Loadbalancer;
    public readonly albSecurityGroup: SecurityGroup;
 
    constructor(scope: App, id: string, props?: StackProps) {
@@ -27,7 +27,7 @@ export class ResourceStack extends Stack {
          ipAddresses: IpAddresses.cidr('10.0.0.0/16'),
       });
 
-      this.loadBalancer = new ApplicationLoadBalancer(this, 'DefaultAlb', {
+      this.loadBalancer = new Loadbalancer(this, 'DefaultAlb', {
          vpc: this.vpc,
          internetFacing: true,
          vpcSubnets: { subnets: this.vpc.publicSubnets },

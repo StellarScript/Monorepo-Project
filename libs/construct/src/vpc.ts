@@ -1,13 +1,14 @@
 import type { Construct } from 'constructs';
 import type { IIpAddresses, IVpc } from 'aws-cdk-lib/aws-ec2';
 
+import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { IpAddresses, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Vpc as VpcConstruct, VpcProps as VpcConstructProps } from 'aws-cdk-lib/aws-ec2';
 import { Parameter } from './paramter';
 
 export interface VpcProps extends Partial<VpcConstructProps> {
    ipAddresses?: IIpAddresses;
+   parameterName?: string;
 }
 
 export class Vpc extends VpcConstruct {
@@ -38,14 +39,14 @@ export class Vpc extends VpcConstruct {
 
       new StringParameter(this, 'VpcId', {
          stringValue: this.vpcId,
-         parameterName: Vpc.parameterName,
+         parameterName: props.parameterName || Vpc.parameterName,
       });
    }
 
-   public static vpcLookup(scope: Construct, id: string): IVpc {
+   public static vpcLookup(scope: Construct, id: string, parameterName?: string): IVpc {
       return Vpc.fromLookup(scope, id, {
          vpcName: Vpc.vpcName,
-         vpcId: Parameter.stringValue(scope, Vpc.parameterName),
+         vpcId: Parameter.stringValue(scope, parameterName || Vpc.parameterName),
       });
    }
 }
