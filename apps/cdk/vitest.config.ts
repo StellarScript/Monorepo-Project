@@ -1,25 +1,18 @@
-import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 export default defineConfig({
-   plugins: [
-      nxViteTsPaths(),
-      swc.vite({
-         module: { type: 'es6' },
-      }),
-   ],
+   plugins: [nxViteTsPaths()],
    test: {
       globals: true,
       cache: {
          dir: '../../node_modules/.vitest',
       },
-      environment: 'jsdom',
-      include: ['apps/cdk/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-
+      environment: 'node',
+      include: ['test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       reporters: ['default'],
       coverage: {
-         reportsDirectory: '../../coverage/apps/cdk',
+         reportsDirectory: '../../coverage/apps/server',
          provider: 'v8',
       },
    },
