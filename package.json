@@ -2,7 +2,9 @@
   "name": "@appify/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "prisma:dev": "sh ./tools/db:dev.sh"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@nestjs/schematics": "^10.0.1",
     "@nestjs/testing": "^10.0.2",
+    "@nx-tools/nx-prisma": "^5.1.0",
     "@nx/eslint": "17.2.8",
     "@nx/eslint-plugin": "17.2.8",
     "@nx/jest": "17.2.8",
@@ -64,6 +67,7 @@
     "unplugin-swc": "^1.4.4",
     "url-loader": "^4.1.1",
     "vite": "^5.0.0",
+    "vite-plugin-dts": "~2.3.0",
     "vitest": "~0.34.6"
   }
 }
