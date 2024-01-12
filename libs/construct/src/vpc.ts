@@ -17,6 +17,7 @@ export class Vpc extends VpcConstruct {
 
    constructor(scope: Construct, id: string, props: VpcProps) {
       super(scope, id, {
+         vpcName: Vpc.vpcName,
          subnetConfiguration: [
             {
                cidrMask: 24,

@@ -4,6 +4,7 @@ import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import configuration from '@appify/shared/config';
 import { ResourceStack } from '../stack/resource';
+import { EcsServiceStack } from '../stack/service';
 
 const app = new App();
 const env = {
@@ -12,3 +13,4 @@ const env = {
 };
 
 new ResourceStack(app, 'resource', { env });
+new EcsServiceStack(app, 'service', { env });
