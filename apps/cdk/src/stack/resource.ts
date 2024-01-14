@@ -52,11 +52,11 @@ export class ResourceStack extends Stack {
          zone: this.zone,
       });
 
+      new Tag('environment', config.inf.stage).visit(this);
+
       new CfnOutput(this, 'AlbArn', {
          exportName: 'albArn',
          value: this.loadBalancer.loadBalancerArn,
       });
-
-      new Tag('environment', config.inf.stage).visit(this);
    }
 }

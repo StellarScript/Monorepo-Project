@@ -47,4 +47,20 @@ export class Vpc extends VpcConstruct {
          vpcId: Parameter.stringValue(scope, parameterName || Vpc.exportParamterName),
       });
    }
+
+   public static getAllSubnetIds(vpc: IVpc): string[] {
+      return [
+         vpc.privateSubnets.map((subnet) => subnet.subnetId),
+         vpc.publicSubnets.map((subnet) => subnet.subnetId),
+         vpc.isolatedSubnets.map((subnet) => subnet.subnetId),
+      ].flat();
+   }
+
+   public static getAllRouteTableIds(vpc: IVpc): string[] {
+      return [
+         vpc.publicSubnets.map((subnet) => subnet.routeTable.routeTableId),
+         vpc.isolatedSubnets.map((subnet) => subnet.routeTable.routeTableId),
+         vpc.privateSubnets.map((subnet) => subnet.routeTable.routeTableId),
+      ].flat();
+   }
 }

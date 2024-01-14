@@ -14,3 +14,5 @@ const env = {
 
 new ResourceStack(app, 'resource', { env });
 new EcsServiceStack(app, 'service', { env });
+
+app.synth();
