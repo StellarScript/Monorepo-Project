@@ -1,13 +1,12 @@
 import { Construct } from 'constructs';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
+import { ContainerImage, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
 
 import type {
-   LogDriver,
    TaskDefinition,
    ContainerDefinition,
    ContainerDefinitionOptions,
 } from 'aws-cdk-lib/aws-ecs';
-import { LogDrivers, ContainerImage } from 'aws-cdk-lib/aws-ecs';
 
 export class RepositoryImage {
    public static FromRepository(scope: Construct, name: string, tag: string): ContainerImage {
@@ -23,12 +22,12 @@ interface ContainerProps extends Partial<ContainerDefinitionOptions> {
 
 export class Container {
    public readonly image: ContainerImage;
-   public readonly logging?: LogDriver;
+   public readonly logging?: AwsLogDriver;
    public readonly container: ContainerDefinition;
 
    constructor(scope: TaskDefinition, containerName: string, props: ContainerProps) {
       this.image = RepositoryImage.FromRepository(scope, containerName, props.tag);
-      this.logging = props.log && LogDrivers.awsLogs({ streamPrefix: containerName });
+      this.logging = props.log && new AwsLogDriver({ streamPrefix: containerName });
 
       this.container = scope.addContainer(containerName, {
          ...props,

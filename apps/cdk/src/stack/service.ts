@@ -23,6 +23,7 @@ import { SecurityGroup } from '@appify/construct/securityGroup';
 import { TaskRole } from '@appify/construct/ecs-role';
 import { Container } from '@appify/construct/container';
 import { HealthCheck } from '@appify/construct/healthCheck';
+import { ServiceStackPermssionBoundary } from '@appify/construct/permissions/service.boundary';
 
 enum Containers {
    Server = 'server',
@@ -36,7 +37,7 @@ export class EcsServiceStack extends Stack {
    public readonly certificate: ICertificate;
 
    public readonly cluster: Cluster;
-   public readonly serviceSG: ISecurityGroup;
+   public readonly serviceSG: SecurityGroup;
    public readonly fargateService: FargateService;
    public readonly taskDefinition: FargateTaskDefinition;
    public readonly appTargetGroup: ApplicationTargetGroup;
@@ -64,7 +65,7 @@ export class EcsServiceStack extends Stack {
          cpu: 2048,
       });
 
-      new Container(this.taskDefinition, Containers.Server, {
+      const serverContainer = new Container(this.taskDefinition, Containers.Server, {
          portMappings: [{ containerPort: 8080 }],
          memoryLimitMiB: 1024,
          cpu: 1024,
@@ -74,7 +75,7 @@ export class EcsServiceStack extends Stack {
             DOPPLER_TOKEN: config.tokens.dopperToken,
          },
       });
-      new Container(this.taskDefinition, Containers.Client, {
+      const clientContainer = new Container(this.taskDefinition, Containers.Client, {
          portMappings: [{ containerPort: 3000 }],
          memoryLimitMiB: 2048,
          cpu: 1024,
@@ -84,7 +85,7 @@ export class EcsServiceStack extends Stack {
 
       this.serviceSG = new SecurityGroup(this, 'Service-SecurityGroup', {
          description: 'Ecs Fargate Service Security Group',
-         securityGroupName: 'Service-SecurityGroup',
+         exportName: 'ServiceSecurityGroup',
          allowAllOutbound: true,
          vpc: this.vpc,
       });
@@ -123,6 +124,16 @@ export class EcsServiceStack extends Stack {
       });
 
       this.fargateService.connections.allowFrom(this.loadBalancer, Port.tcp(443));
+
+      new ServiceStackPermssionBoundary(this, 'ServiceStackPermissionBoundary', {
+         vpc: this.vpc,
+         cluster: this.cluster,
+         securityGroup: this.serviceSG,
+         loadBalancer: this.loadBalancer,
+         targetGroups: [this.appTargetGroup],
+         logDrivers: [serverContainer.logging, clientContainer.logging],
+      });
+
       new Tag('environment', config.inf.stage).visit(this);
    }
 }
