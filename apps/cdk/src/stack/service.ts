@@ -47,7 +47,7 @@ export class EcsServiceStack extends Stack {
 
       // Lookup existing resources
       this.vpc = Vpc.vpcLookup(this, 'VpcLookup');
-      this.albSG = SecurityGroup.securityGroupLookup(this, 'SecurityGroupLookup', this.vpc);
+      this.albSG = SecurityGroup.securityGroupLookup(this, 'SecurityGroupLookup');
       this.loadBalancer = Loadbalancer.loadbalancerLookup(this, 'AlbLookup', this.albSG.securityGroupId);
       this.certificate = Certificate.fromCertificateArn(this, 'CertLookup', config.inf.certificateArn);
 

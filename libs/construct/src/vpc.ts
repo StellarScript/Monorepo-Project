@@ -12,12 +12,10 @@ export interface VpcProps extends Partial<VpcConstructProps> {
 }
 
 export class Vpc extends VpcConstruct {
-   static readonly vpcName = 'default-vpc';
-   static readonly parameterName = '/vpc/id';
+   static readonly exportParamterName = '/vpc/id';
 
    constructor(scope: Construct, id: string, props: VpcProps) {
       super(scope, id, {
-         vpcName: Vpc.vpcName,
          subnetConfiguration: [
             {
                cidrMask: 24,
@@ -40,14 +38,13 @@ export class Vpc extends VpcConstruct {
 
       new StringParameter(this, 'VpcId', {
          stringValue: this.vpcId,
-         parameterName: props.parameterName || Vpc.parameterName,
+         parameterName: props.parameterName || Vpc.exportParamterName,
       });
    }
 
    public static vpcLookup(scope: Construct, id: string, parameterName?: string): IVpc {
       return Vpc.fromLookup(scope, id, {
-         vpcName: Vpc.vpcName,
-         vpcId: Parameter.stringValue(scope, parameterName || Vpc.parameterName),
+         vpcId: Parameter.stringValue(scope, parameterName || Vpc.exportParamterName),
       });
    }
 }

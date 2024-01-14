@@ -7,6 +7,7 @@ import {
    SecurityGroup as SecurityGroupConstruct,
    SecurityGroupProps as SecurityGroupConstructProps,
 } from 'aws-cdk-lib/aws-ec2';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 export interface SecurityGroupProps extends Partial<SecurityGroupConstructProps> {
    vpc: Vpc | IVpc;
@@ -14,22 +15,26 @@ export interface SecurityGroupProps extends Partial<SecurityGroupConstructProps>
 }
 
 export class SecurityGroup extends SecurityGroupConstruct {
-   public static readonly securityGroupName = 'resource-security-group';
+   public static readonly exportParamterName = 'DefaultSecurityGroup';
 
    constructor(scope: Construct, id: string, props: SecurityGroupProps) {
       super(scope, id, {
-         securityGroupName: SecurityGroup.securityGroupName,
+         securityGroupName: SecurityGroup.exportParamterName,
          ...props,
+      });
+
+      new StringParameter(this, `${id}Id-Parameter`, {
+         parameterName: props.exportName || SecurityGroup.exportParamterName,
+         stringValue: this.securityGroupId,
       });
    }
 
    public static securityGroupLookup(
       scope: Construct,
       id: string,
-      vpc: IVpc,
       securityGroupName?: string
    ): ISecurityGroup {
-      const name = securityGroupName || SecurityGroup.securityGroupName;
-      return SecurityGroup.fromLookupByName(scope, id, name, vpc);
+      const name = securityGroupName || SecurityGroup.exportParamterName;
+      return SecurityGroup.fromSecurityGroupId(scope, id, name);
    }
 }
