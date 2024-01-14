@@ -61,7 +61,7 @@ export class ResourceStackPermssionBoundary extends Construct {
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: ['elasticloadbalancing:DeleteLoadBalancer'],
-               resources: [props.loadBalancer.loadBalancerArn],
+               resources: [Loadbalancer.getArn(props.loadBalancer)],
                conditions: this.constructTag,
             }),
 
@@ -74,7 +74,7 @@ export class ResourceStackPermssionBoundary extends Construct {
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: ['ec2:DeleteVpc'],
-               resources: [props.vpc.vpcArn],
+               resources: [Vpc.getArn(props.vpc)],
             }),
 
             new PolicyStatement({
@@ -143,7 +143,7 @@ export class ResourceStackPermssionBoundary extends Construct {
                   'elasticloadbalancing:AddTags',
                   'elasticloadbalancing:ModifyLoadBalancerAttributes',
                ],
-               resources: [props.loadBalancer.loadBalancerArn],
+               resources: [Loadbalancer.getArn(props.loadBalancer)],
                conditions: this.constructTag,
             }),
 
@@ -162,7 +162,7 @@ export class ResourceStackPermssionBoundary extends Construct {
                   'ec2:AttachInternetGateway',
                   'ec2:DetachInternetGateway',
                ],
-               resources: [props.vpc.vpcArn],
+               resources: [Vpc.getArn(props.vpc)],
             }),
 
             new PolicyStatement({

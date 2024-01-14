@@ -48,6 +48,10 @@ export class Vpc extends VpcConstruct {
       });
    }
 
+   public static getArn(vpc: Vpc): string {
+      return `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:vpc/${vpc.vpcId}`;
+   }
+
    public static getInternetGatewayArn(vpc: Vpc): string {
       return `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:internet-gateway/${vpc.internetGatewayId}`;
    }

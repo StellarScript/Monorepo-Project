@@ -37,7 +37,7 @@ export class ResourceStack extends Stack {
       this.albSecurityGroup = new SecurityGroup(this, 'AlbSecurityGroup', {
          vpc: this.vpc,
          allowAllOutbound: true,
-         description: 'Load Balancer Security Group',
+         description: 'Security Group for Load Balancer',
       });
 
       this.loadBalancer.addSecurityGroup(this.albSecurityGroup);

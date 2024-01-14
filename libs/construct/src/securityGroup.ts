@@ -15,11 +15,10 @@ export interface SecurityGroupProps extends Partial<SecurityGroupConstructProps>
 }
 
 export class SecurityGroup extends SecurityGroupConstruct {
-   public static readonly exportParamterName = 'DefaultSecurityGroup';
+   public static readonly exportParamterName = '/sg/securityGroupId';
 
    constructor(scope: Construct, id: string, props: SecurityGroupProps) {
       super(scope, id, {
-         securityGroupName: SecurityGroup.exportParamterName,
          ...props,
       });
 

@@ -1,11 +1,14 @@
 import type { Construct } from 'constructs';
 import type { ApplicationLoadBalancerProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { CfnOutput, Fn, Stack } from 'aws-cdk-lib/core';
+import { CfnOutput, Stack } from 'aws-cdk-lib/core';
 import {
    ApplicationLoadBalancer as Alb,
    IApplicationLoadBalancer as IAlb,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+
 import type { Vpc } from './vpc';
+import { Parameter } from './paramter';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 interface LoadbalancerProps extends Partial<ApplicationLoadBalancerProps> {
    vpc: Vpc;
@@ -13,34 +16,27 @@ interface LoadbalancerProps extends Partial<ApplicationLoadBalancerProps> {
 }
 
 export class Loadbalancer extends Alb {
-   public static readonly exportParamterName = 'securityGroup';
+   public static readonly exportParamterName = '/alb/securityGroup';
 
    constructor(scope: Construct, id: string, props: LoadbalancerProps) {
       super(scope, id, {
          ...props,
       });
 
-      new CfnOutput(this, 'AlbArn', {
-         value: this.loadBalancerArn,
-         exportName: props.exportName || Loadbalancer.exportParamterName,
+      new StringParameter(scope, `${id}-Parameter`, {
+         stringValue: this.loadBalancerArn,
+         parameterName: Loadbalancer.exportParamterName,
       });
    }
 
-   public static loadbalancerLookup(
-      scope: Construct,
-      id: string,
-      securityGroupId: string,
-      loadBalancerArn?: string
-   ): IAlb {
-      return Alb.fromApplicationLoadBalancerAttributes(scope, id, {
-         loadBalancerArn: loadBalancerArn || Fn.importValue(Loadbalancer.exportParamterName),
-         securityGroupId: securityGroupId,
+   public static loadbalancerLookup(scope: Construct, id: string, loadBalancerArn?: string): IAlb {
+      const paramterValue = Parameter.stringValue(scope, Loadbalancer.exportParamterName);
+      return Alb.fromLookup(scope, id, {
+         loadBalancerArn: paramterValue,
       });
    }
 
-   public static getArn(scope: Construct, loadBalancerName: string): string {
-      const account = Stack.of(scope).account;
-      const region = Stack.of(scope).region;
-      return `arn:aws:elasticloadbalancing:${region}:${account}:loadbalancer/${loadBalancerName}`;
+   public static getArn(alb: Loadbalancer): string {
+      return `arn:aws:elasticloadbalancing:${alb.stack.region}:${alb.stack.account}:loadbalancer/${alb.loadBalancerName}`;
    }
 }
