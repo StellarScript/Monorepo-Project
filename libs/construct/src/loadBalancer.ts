@@ -1,6 +1,6 @@
 import type { Construct } from 'constructs';
 import type { ApplicationLoadBalancerProps } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { CfnOutput, Fn } from 'aws-cdk-lib/core';
+import { CfnOutput, Fn, Stack } from 'aws-cdk-lib/core';
 import {
    ApplicationLoadBalancer as Alb,
    IApplicationLoadBalancer as IAlb,
@@ -36,5 +36,11 @@ export class Loadbalancer extends Alb {
          loadBalancerArn: loadBalancerArn || Fn.importValue(Loadbalancer.exportParamterName),
          securityGroupId: securityGroupId,
       });
+   }
+
+   public static getArn(scope: Construct, loadBalancerName: string): string {
+      const account = Stack.of(scope).account;
+      const region = Stack.of(scope).region;
+      return `arn:aws:elasticloadbalancing:${region}:${account}:loadbalancer/${loadBalancerName}`;
    }
 }

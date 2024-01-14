@@ -37,4 +37,8 @@ export class SecurityGroup extends SecurityGroupConstruct {
       const name = securityGroupName || SecurityGroup.exportParamterName;
       return SecurityGroup.fromSecurityGroupId(scope, id, name);
    }
+
+   public static getArn(sg: SecurityGroup): string {
+      return `arn:aws:ec2:${sg.stack.region}:${sg.stack.account}:security-group/${sg.securityGroupId}`;
+   }
 }

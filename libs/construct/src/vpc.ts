@@ -48,6 +48,10 @@ export class Vpc extends VpcConstruct {
       });
    }
 
+   public static getInternetGatewayArn(vpc: Vpc): string {
+      return `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:internet-gateway/${vpc.internetGatewayId}`;
+   }
+
    public static getAllSubnetIds(vpc: IVpc): string[] {
       return [
          vpc.privateSubnets.map((subnet) => subnet.subnetId),
@@ -56,11 +60,26 @@ export class Vpc extends VpcConstruct {
       ].flat();
    }
 
+   public static getAllSubnetArns(vpc: IVpc): string[] {
+      const subnetIds = this.getAllSubnetIds(vpc);
+      return subnetIds.map(
+         (subnetId) => `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:subnet/${subnetId}`
+      );
+   }
+
    public static getAllRouteTableIds(vpc: IVpc): string[] {
       return [
          vpc.publicSubnets.map((subnet) => subnet.routeTable.routeTableId),
          vpc.isolatedSubnets.map((subnet) => subnet.routeTable.routeTableId),
          vpc.privateSubnets.map((subnet) => subnet.routeTable.routeTableId),
       ].flat();
+   }
+
+   public static getAllRouteTableArns(vpc: IVpc): string[] {
+      const routeTableIds = this.getAllRouteTableIds(vpc);
+      return routeTableIds.map(
+         (routeTableId) =>
+            `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:route-table/${routeTableId}`
+      );
    }
 }
