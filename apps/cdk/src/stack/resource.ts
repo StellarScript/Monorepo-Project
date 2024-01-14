@@ -8,8 +8,9 @@ import { ARecord, PublicHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53
 
 import config from '@appify/shared/config';
 import { Vpc } from '@appify/construct/vpc';
-import { SecurityGroup } from '@appify/construct/securityGroup';
 import { Loadbalancer } from '@appify/construct/loadBalancer';
+import { SecurityGroup } from '@appify/construct/securityGroup';
+import { ResourceStackPermssionBoundary } from '@appify/construct/permissions/resource.boundary';
 
 export class ResourceStack extends Stack {
    public readonly vpc: Vpc;
@@ -50,6 +51,12 @@ export class ResourceStack extends Stack {
          target: RecordTarget.fromAlias(new LoadBalancerTarget(this.loadBalancer)),
          recordName: config.inf.hostedZoneDomain,
          zone: this.zone,
+      });
+
+      new ResourceStackPermssionBoundary(this, 'ResourceStackPermssion', {
+         vpc: this.vpc,
+         loadBalancer: this.loadBalancer,
+         securityGroup: this.albSecurityGroup,
       });
 
       new Tag('environment', config.inf.stage).visit(this);

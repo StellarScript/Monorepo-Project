@@ -12,33 +12,110 @@ interface PermissionBoundaryProps {
    securityGroup: SecurityGroup;
 }
 
-export class ResourcePermssionBoundaryPolicy extends Construct {
+export class ResourceStackPermssionBoundary extends Construct {
    constructor(scope: Construct, id: string, props: PermissionBoundaryProps) {
       super(scope, id);
 
       const account = Stack.of(this).account;
       const region = Stack.of(this).region;
 
-      new ManagedPolicy(this, `${id}-Policy`, {
-         managedPolicyName: `${id}-Policy`,
+      new ManagedPolicy(this, `Creation-${id}-Policy`, {
+         managedPolicyName: `Creation-${id}-Policy`,
          statements: [
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: [
-                  'ec2:CreateTags',
                   'ec2:CreateVpc',
+                  'ec2:CreateTags',
                   'ec2:CreateSubnet',
                   'ec2:AllocateAddress',
-                  'ec2:AssociateRouteTable',
                   'ec2:CreateRouteTable',
-                  'ec2:CreateNatGateway',
-                  'ec2:CreateInternetGateway',
+                  'ec2:AssociateRouteTable',
                   'ec2:CreateSecurityGroup',
+                  'ec2:CreateInternetGateway',
                   'elasticloadbalancing:CreateLoadBalancer',
                ],
                resources: ['*'],
+               conditions: this.requestTag,
             }),
 
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ec2:CreateNatGateway'],
+               resources: [`arn:aws:ec2:${region}:${account}:natgateway/*`],
+               conditions: this.constructTag,
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['iam:CreatePolicy'],
+               resources: [`arn:aws:iam::${account}:policy/*`],
+               conditions: this.requestTag,
+            }),
+         ],
+      });
+
+      new ManagedPolicy(this, `Deletion-${id}-Policy`, {
+         managedPolicyName: `Deletion-${id}-Policy`,
+         statements: [
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['elasticloadbalancing:DeleteLoadBalancer'],
+               resources: [props.loadBalancer.loadBalancerArn],
+               conditions: this.constructTag,
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ec2:DeleteRoute', 'ec2:DeleteRouteTable'],
+               resources: Vpc.getAllRouteTableArns(props.vpc),
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ec2:DeleteVpc'],
+               resources: [props.vpc.vpcArn],
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ec2:DeleteSubnet', 'ec2:DeleteNatGateway'],
+               resources: Vpc.getAllSubnetArns(props.vpc),
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ec2:DeleteInternetGateway'],
+               resources: [Vpc.getInternetGatewayArn(props.vpc)],
+               conditions: this.constructTag,
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ec2:DeleteSecurityGroup'],
+               resources: [SecurityGroup.getArn(props.securityGroup)],
+               conditions: this.constructTag,
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['ssm:DeleteParameter'],
+               resources: [`arn:aws:ssm:${region}:${account}:parameter/*`],
+               conditions: { ...this.constructTag, ...this.requestTag },
+            }),
+
+            new PolicyStatement({
+               effect: Effect.ALLOW,
+               actions: ['iam:DeletePolicy', 'iam:DeletePolicyVersion'],
+               resources: [`arn:aws:iam::${account}:policy/${id}-Policy`],
+               conditions: { ...this.constructTag, ...this.requestTag },
+            }),
+         ],
+      });
+
+      new ManagedPolicy(this, `Boundary-${id}-Policy`, {
+         managedPolicyName: `${id}-Policy`,
+         statements: [
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: [
@@ -57,14 +134,13 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
                   'elasticloadbalancing:DescribeLoadBalancerAttributes',
                ],
                resources: ['*'],
-               conditions: this.constructTag,
+               conditions: { ...this.constructTag, ...this.requestTag },
             }),
 
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: [
                   'elasticloadbalancing:AddTags',
-                  'elasticloadbalancing:DeleteLoadBalancer',
                   'elasticloadbalancing:ModifyLoadBalancerAttributes',
                ],
                resources: [props.loadBalancer.loadBalancerArn],
@@ -73,19 +149,13 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
 
             new PolicyStatement({
                effect: Effect.ALLOW,
-               actions: [
-                  'ec2:CreateRoute',
-                  'ec2:DeleteRoute',
-                  'ec2:DeleteRouteTable',
-                  'ec2:DescribeRouteTables',
-               ],
+               actions: ['ec2:CreateRoute', 'ec2:DescribeRouteTables'],
                resources: Vpc.getAllRouteTableArns(props.vpc),
             }),
 
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: [
-                  'ec2:DeleteVpc',
                   'ec2:CreateRouteTable',
                   'ec2:CreateSecurityGroup',
                   'ec2:ModifyVpcAttribute',
@@ -97,17 +167,13 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
 
             new PolicyStatement({
                effect: Effect.ALLOW,
-               actions: ['ec2:DeleteSubnet', 'ec2:DeleteNatGateway', 'ec2:ModifySubnetAttribute'],
+               actions: ['ec2:ModifySubnetAttribute'],
                resources: Vpc.getAllSubnetArns(props.vpc),
             }),
 
             new PolicyStatement({
                effect: Effect.ALLOW,
-               actions: [
-                  'ec2:AttachInternetGateway',
-                  'ec2:DeleteInternetGateway',
-                  'ec2:DetachInternetGateway',
-               ],
+               actions: ['ec2:AttachInternetGateway', 'ec2:DetachInternetGateway'],
                resources: [Vpc.getInternetGatewayArn(props.vpc)],
                conditions: this.constructTag,
             }),
@@ -115,7 +181,6 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: [
-                  'ec2:DeleteSecurityGroup',
                   'ec2:RevokeSecurityGroupEgress',
                   'ec2:AuthorizeSecurityGroupEgress',
                   'ec2:AuthorizeSecurityGroupIngress',
@@ -133,16 +198,9 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
 
             new PolicyStatement({
                effect: Effect.ALLOW,
-               actions: ['ec2:CreateNatGateway', 'ec2:DeleteNatGateway'],
-               resources: [`arn:aws:ec2:${region}:${account}:natgateway/*`],
-               conditions: this.constructTag,
-            }),
-
-            new PolicyStatement({
-               effect: Effect.ALLOW,
-               actions: ['ssm:GetParameters', 'ssm:DeleteParameter'],
+               actions: ['ssm:GetParameters'],
                resources: [`arn:aws:ssm:${region}:${account}:parameter/*`],
-               conditions: this.constructTag,
+               conditions: { ...this.constructTag, ...this.requestTag },
             }),
 
             new PolicyStatement({
@@ -153,9 +211,15 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
 
             new PolicyStatement({
                effect: Effect.ALLOW,
-               actions: ['iam:CreatePolicy'],
-               resources: [`arn:aws:iam::${account}:policy/*`],
-               conditions: this.constructTag,
+               actions: [
+                  'iam:GetPolicy',
+                  'iam:ListRolePolicies',
+                  'iam:ListPolicyVersions',
+                  'iam:CreatePolicyVersion',
+                  'iam:ListEntitiesForPolicy',
+               ],
+               resources: [`arn:aws:iam::${account}:policy/${id}-Policy`],
+               conditions: { ...this.constructTag, ...this.requestTag },
             }),
 
             new PolicyStatement({
@@ -166,18 +230,6 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
                   'route53:ChangeResourceRecordSets',
                ],
                resources: [`arn:aws:route53:::hostedzone/*`],
-               conditions: this.constructTag,
-            }),
-
-            new PolicyStatement({
-               effect: Effect.ALLOW,
-               actions: [
-                  'iam:GetPolicy',
-                  'iam:DeletePolicy',
-                  'iam:ListPolicyVersions',
-                  'iam:ListEntitiesForPolicy',
-               ],
-               resources: [`arn:aws:iam::${account}:policy/*`],
                conditions: this.constructTag,
             }),
 
@@ -195,6 +247,14 @@ export class ResourcePermssionBoundaryPolicy extends Construct {
       return {
          'ForAllValues:StringEquals': {
             'aws:TagKeys': ['environment'],
+         },
+      };
+   }
+
+   private get requestTag() {
+      return {
+         StringEquals: {
+            'aws:RequestTag/environment': ['environment'],
          },
       };
    }
