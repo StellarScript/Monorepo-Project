@@ -19,8 +19,8 @@ export class ResourceStackPermssionBoundary extends Construct {
       const account = Stack.of(this).account;
       const region = Stack.of(this).region;
 
-      new ManagedPolicy(this, `Creation-${id}-Policy`, {
-         managedPolicyName: `Creation-${id}-Policy`,
+      new ManagedPolicy(this, `Creation-${id}`, {
+         managedPolicyName: `Creation-${id}`,
          statements: [
             new PolicyStatement({
                effect: Effect.ALLOW,
@@ -55,8 +55,8 @@ export class ResourceStackPermssionBoundary extends Construct {
          ],
       });
 
-      new ManagedPolicy(this, `Deletion-${id}-Policy`, {
-         managedPolicyName: `Deletion-${id}-Policy`,
+      new ManagedPolicy(this, `Deletion-${id}`, {
+         managedPolicyName: `Deletion-${id}`,
          statements: [
             new PolicyStatement({
                effect: Effect.ALLOW,
@@ -113,8 +113,8 @@ export class ResourceStackPermssionBoundary extends Construct {
          ],
       });
 
-      new ManagedPolicy(this, `Boundary-${id}-Policy`, {
-         managedPolicyName: `${id}-Policy`,
+      new ManagedPolicy(this, `Modification-${id}`, {
+         managedPolicyName: `Modification-${id}`,
          statements: [
             new PolicyStatement({
                effect: Effect.ALLOW,
