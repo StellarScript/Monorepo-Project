@@ -2137,7 +2137,7 @@
   dependencies:
     "@nx/eslint" "17.2.8"
 
-"@nx/nest@17.2.8", "@nx/nest@^17.2.8":
+"@nx/nest@17.2.8":
   version "17.2.8"
   resolved "https://registry.yarnpkg.com/@nx/nest/-/nest-17.2.8.tgz#6e84f2e802f961fa05e04b7a9fff7b55854519de"
   integrity sha512-VZ84VBWACcABjU4djWHHVxY83g3VTkg13AjAeZWyvPAMkNqS05e2jj3CpPVd4EAbwqXX3/CLM/bLKRuGWpYCWg==
@@ -2151,7 +2151,7 @@
     "@phenomnomnominal/tsquery" "~5.0.1"
     tslib "^2.3.0"
 
-"@nx/next@17.2.8", "@nx/next@^17.2.8":
+"@nx/next@17.2.8":
   version "17.2.8"
   resolved "https://registry.yarnpkg.com/@nx/next/-/next-17.2.8.tgz#7f26e0f1c9e5256149b191cbb9c66a67054740ba"
   integrity sha512-CqzcLyrLl5H82zb+3oL/Jh9GfoLgK8qLyJ3w4vUR2M0UbunKC6NyfQ2qLzlTBkiKY557x2o/8zTwXyGcpO34fA==
@@ -2303,7 +2303,7 @@
     minimatch "3.0.5"
     tslib "^2.3.0"
 
-"@nx/vite@17.2.8", "@nx/vite@^17.2.8":
+"@nx/vite@17.2.8":
   version "17.2.8"
   resolved "https://registry.yarnpkg.com/@nx/vite/-/vite-17.2.8.tgz#d824fc488605d502dee7e1e8ad2a6be3083eb294"
   integrity sha512-EGRNRtJOG/zA3mtN29+KO5jh3MeAjD0En6Ab9rMOmc46FWf6uxb5BfzdVGHKk6MXEwXYv0d7AHe2qBiCk7TCWQ==
