@@ -1,11 +1,11 @@
 {
    "name": "@appify/source",
-   "version": "0.0.0",
+   "version": "0.0.1",
    "license": "MIT",
+   "private": true,
    "scripts": {
       "prisma:dev": "sh ./tools/db:dev.sh"
    },
-   "private": true,
    "dependencies": {
       "@nestjs/common": "^10.0.2",
       "@nestjs/config": "^3.1.1",
