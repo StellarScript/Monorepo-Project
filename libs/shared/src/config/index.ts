@@ -5,8 +5,6 @@ const configuration = {
       frontendUrl: process.env['FRONTEND_URL'],
       backendUrl: process.env['BACKEND_URL'],
       serverPort: process.env['SERVER_PORT'],
-      sessionSecret: process.env['SESSION_SECRET'],
-      redisUri: process.env['REDIS_URI'],
    },
 
    auth0: {
@@ -23,15 +21,17 @@ const configuration = {
       hostedZoneId: process.env['HOSTED_ZONE_ID'],
       hostedZoneDomain: process.env['HOSTED_ZONE_DOMAIN'],
       certificateArn: process.env['CERTIFICATE_ARN'],
-      // TODO: Pass as env
-      vpcName: 'DefaultVpc',
-      albSecurityGroupName: 'AlbSecurityGroup',
    },
 
    database: {
       port: Number(process.env['DATABASE_PORT']),
       password: process.env['DATABASE_PASSWORD'],
       identifier: process.env['DATABASE_IDENTIFIER'],
+   },
+
+   redis: {
+      sessionSecret: process.env['SESSION_SECRET'],
+      redisUri: process.env['REDIS_URI'],
    },
 
    aws: {
