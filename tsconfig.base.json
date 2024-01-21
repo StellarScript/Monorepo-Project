@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@appify/shared": ["libs/shared/src/*"],
+      "@appify/shared/*": ["libs/shared/src/*"],
       "@appify/utils": ["libs/utils/src/index.ts"]
     }
   },
