@@ -44,7 +44,9 @@
       "test": {
          "executor": "@nx/vite:test",
          "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-         "options": {}
+         "options": {
+            "config": "apps/server/vitest.config.ts"
+         }
       }
    },
    "tags": []
