@@ -37,8 +37,6 @@ export class ResourceStack extends Stack {
          vpc: this.vpc,
       });
 
-      this.alb.addSecurityGroup(this.albSG);
-
       this.zone = PublicHostedZone.fromHostedZoneAttributes(this, 'hosted-zone', {
          hostedZoneId: config.inf.hostedZoneId,
          zoneName: config.inf.hostedZoneDomain,
@@ -49,6 +47,8 @@ export class ResourceStack extends Stack {
          recordName: config.inf.hostedZoneDomain,
          zone: this.zone,
       });
+
+      this.alb.addSecurityGroup(this.albSG);
 
       new Tag('environment', config.inf.stage).visit(this);
    }
