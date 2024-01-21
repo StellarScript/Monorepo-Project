@@ -1,7 +1,8 @@
-import { container, singleton } from 'tsyringe';
+import { singleton } from 'tsyringe';
 import { Compatibility as EcsCompatibility, PortMapping } from 'aws-cdk-lib/aws-ecs';
 import { TaskDefTemplate, AppSpecTemplate, ImageDefTemplate } from './templates';
 import { Arn } from '../arns';
+import { TemplateType } from './template-asset';
 
 interface Account {
    region: string;
@@ -46,12 +47,6 @@ const Compatibility = {
    '2': 'EC2_AND_FARGATE',
    '3': 'EXTERNAL',
 };
-
-export enum TemplateType {
-   TASK_DEF = 'taskdef',
-   APP_SPEC = 'appspec',
-   IMAGE_DEF = 'imageDetails',
-}
 
 @singleton()
 export class TemplateSchema {
@@ -105,7 +100,6 @@ export class TemplateSchema {
          const { name, portMappings } = this.containerDefinitions.find(
             ({ essential }) => essential === true
          );
-
          const template = new AppSpecTemplate(OUT_DIR, {
             ContainerPort: portMappings[0].containerPort,
             ContainerName: name,

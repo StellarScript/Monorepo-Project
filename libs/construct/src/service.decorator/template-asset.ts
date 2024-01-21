@@ -1,17 +1,20 @@
 import type { Construct } from 'constructs';
+import type { IGrantable } from 'aws-cdk-lib/aws-iam';
 
 import { container } from 'tsyringe';
 import { Asset } from 'aws-cdk-lib/aws-s3-assets';
-import { TemplateSchema, TemplateType } from './task.schema';
+import { TemplateSchema } from './task.schema';
 
-export interface TemplateAssetProps {
-   type: TemplateType;
+export enum TemplateType {
+   TASK_DEF = 'taskdef',
+   APP_SPEC = 'appspec',
+   IMAGE_DEF = 'imageDetails',
 }
 
 export class TemplateAsset extends Asset {
-   constructor(scope: Construct, id: string, props: TemplateAssetProps) {
+   constructor(scope: Construct, id: string, type: TemplateType) {
       const schema = container.resolve(TemplateSchema);
-      const outputPath = schema.templateFactory(props.type);
+      const outputPath = schema.templateFactory(type);
 
       super(scope, id, { path: outputPath });
    }
