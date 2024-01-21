@@ -16,7 +16,8 @@
       "baseUrl": ".",
       "paths": {
          "@appify/shared/*": ["libs/shared/src/*"],
-         "@appify/utils": ["libs/utils/src/index.ts"]
+         "@appify/utils": ["libs/utils/src/index.ts"],
+         "@appify/construct/*": ["libs/construct/src/*"]
       }
    },
    "exclude": ["node_modules", "tmp"]

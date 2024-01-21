@@ -2,7 +2,7 @@
 import 'source-map-support/register';
 
 import { App } from 'aws-cdk-lib';
-import { AppStack } from '../stack/app';
+import { ResourceStack } from '../stack/resource';
 
 const app = new App();
-new AppStack(app, 'cdk');
+new ResourceStack(app, 'resource-stack');
