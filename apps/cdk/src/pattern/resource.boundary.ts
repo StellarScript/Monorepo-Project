@@ -213,14 +213,14 @@ export class ResourceStackPermssionBoundary extends Construct {
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: ['ssm:GetParameters'],
-               resources: [Arn.Parameter(region, account, '*')],
+               resources: [Arn.SsmParameter(region, account, '*')],
                conditions: { ...this.constructTag, ...this.requestTag },
             }),
 
             new PolicyStatement({
                effect: Effect.ALLOW,
                actions: ['ssm:PutParameter', 'ssm:AddTagsToResource'],
-               resources: [Arn.Parameter(region, account, '*')],
+               resources: [Arn.SsmParameter(region, account, '*')],
             }),
 
             new PolicyStatement({

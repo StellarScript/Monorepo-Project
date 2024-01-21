@@ -27,7 +27,32 @@ export class Arn {
       return `arn:aws:ec2:${region}:${account}:elastic-ip/${id}`;
    }
 
-   public static Parameter(region: string, account: string, id: string): string {
+   public static SsmParameter(region: string, account: string, id: string): string {
       return `arn:aws:ssm:${region}:${account}:parameter/${id}`;
+   }
+
+   public static EcsCluster(region: string, account: string, clusterName: string): string {
+      return `arn:aws:ecs:${region}:${account}:cluster/${clusterName}`;
+   }
+
+   public static Policy(account: string, policyName: string): string {
+      return `arn:aws:iam::${account}:policy/${policyName}`;
+   }
+
+   public static Role(account: string, roleName: string): string {
+      return `arn:aws:iam::${account}:role/${roleName}`;
+   }
+
+   public static LogGroup(region: string, account: string, logGroupName: string): string {
+      return `arn:aws:logs:${region}:${account}:log-group:${logGroupName}`;
+   }
+
+   public static ElbTargetGroup(region: string, account: string, id: string, name: string): string {
+      // check for name | id
+      return `arn:aws:elasticloadbalancing:${region}:${account}:targetgroup/${id}/${name}`;
+   }
+
+   public static EcsService(region: string, account: string, id: string, name: string): string {
+      return `arn:aws:ecs:${region}:${account}:service/${id}/${name}`;
    }
 }
