@@ -37,47 +37,15 @@
         }
       }
     },
-    "docker-build": {
-      "dependsOn": ["build"],
-      "command": "docker build -f apps/server/Dockerfile . -t server"
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
     },
     "test": {
-      "executor": "@nx/vite:test",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {}
-    },
-    "prisma-generate": {
-      "executor": "@nx-tools/nx-prisma:generate",
       "options": {
-        "schema": "apps/server/prisma/schema.prisma"
-      }
-    },
-    "prisma-migrate": {
-      "executor": "@nx-tools/nx-prisma:migrate",
-      "options": {
-        "schema": "apps/server/prisma/schema.prisma"
-      }
-    },
-    "prisma-push": {
-      "executor": "@nx-tools/nx-prisma:push",
-      "options": {
-        "schema": "apps/server/prisma/schema.prisma"
-      }
-    },
-    "prisma-deploy": {
-      "executor": "@nx-tools/nx-prisma:deploy",
-      "options": {
-        "schema": "apps/server/prisma/schema.prisma"
-      }
-    },
-    "prisma-studio": {
-      "executor": "@nx-tools/nx-prisma:studio",
-      "options": {
-        "schema": "apps/server/prisma/schema.prisma"
+        "jestConfig": "apps/server/jest.config.ts"
       }
     }
   },

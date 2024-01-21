@@ -37,12 +37,8 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-.env
+
+.nx/cache
 
 # Next.js
 .next
-.nx/cache
-
-# AWS CDK
-cdk.out
-cdk.context.json
