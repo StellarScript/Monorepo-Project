@@ -21,6 +21,7 @@ import { HealthCheck } from '@appify/construct/healthCheck';
 import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
 import { FargateServiceConstruct } from '@appify/construct/fargateService';
 import { Containers, ImageTag } from '../pattern/constants';
+import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
 
 export class EcsServiceStack extends Stack {
    public readonly vpc: IVpc;
@@ -132,6 +133,12 @@ export class EcsServiceStack extends Stack {
       });
 
       this.fargateService.connections.allowFrom(this.alb, Port.tcp(443));
+
+      new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
+         cluster: this.cluster,
+         securityGroup: this.serviceSG,
+         logDrivers: [serverContainer.logging, clientContainer.logging],
+      });
 
       new TagStack(this, [{ identity: config.inf.identifierTag }, { environment: config.inf.stage }]);
    }
