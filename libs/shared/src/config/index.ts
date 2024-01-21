@@ -6,4 +6,8 @@ export default {
       hostedZoneDomain: process.env['HOSTED_ZONE_DOMAIN'],
       certificateArn: process.env['CERTIFICATE_ARN'],
    },
+
+   tokens: {
+      doppler: process.env['DOPPLER_TOKEN'],
+   },
 };
