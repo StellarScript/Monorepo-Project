@@ -3,7 +3,7 @@ import { container } from 'tsyringe';
 import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { Container } from '../container';
-import { TaskSchema } from './task.schema';
+import { TemplateSchema } from './task.schema';
 
 export function TaskDefinitionDescriptor() {
    return function <T extends { new (...args: any[]): FargateTaskDefinition }>(constructor: T) {
@@ -11,7 +11,7 @@ export function TaskDefinitionDescriptor() {
          constructor(...args: any[]) {
             super(...args);
 
-            const schema = container.resolve(TaskSchema);
+            const schema = container.resolve(TemplateSchema);
             schema.registerTaskDefinition({
                cpu: this['_cpu'],
                memory: this['_memory'],
@@ -32,7 +32,7 @@ export function containerDescriptor() {
          constructor(...args: any[]) {
             super(...args);
 
-            const taskdef = container.resolve(TaskSchema);
+            const taskdef = container.resolve(TemplateSchema);
 
             taskdef.registerContainer({
                cpu: this.container.cpu,
@@ -41,19 +41,6 @@ export function containerDescriptor() {
                portMappings: this.container.portMappings,
                imageName: this.container.imageName,
             });
-         }
-      };
-   };
-}
-
-export function templateProducer() {
-   return function <T extends { new (...args: any[]): Stack }>(constructor: T) {
-      return class extends constructor {
-         constructor(...args: any[]) {
-            super(...args);
-
-            const taskdef = container.resolve(TaskSchema);
-            taskdef.produceTemplates();
          }
       };
    };

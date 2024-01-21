@@ -77,6 +77,7 @@ export class EcsServiceStack extends Stack {
       const clientContainer = new Container(this.taskDefinition, Containers.Client, {
          portMappings: [{ containerPort: 3000 }],
          tag: ImageTag.Latest,
+         essential: true,
          log: true,
       });
 

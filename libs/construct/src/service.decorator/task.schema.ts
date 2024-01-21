@@ -1,5 +1,6 @@
-import { Compatibility as EcsCompatibility, PortMapping } from 'aws-cdk-lib/aws-ecs';
 import { container, singleton } from 'tsyringe';
+import { Compatibility as EcsCompatibility, PortMapping } from 'aws-cdk-lib/aws-ecs';
+import { TaskDefTemplate, AppSpecTemplate, ImageDefTemplate } from './templates';
 import { Arn } from '../arns';
 
 interface Account {
@@ -46,8 +47,14 @@ const Compatibility = {
    '3': 'EXTERNAL',
 };
 
+export enum TemplateType {
+   TASK_DEF = 'taskdef',
+   APP_SPEC = 'appspec',
+   IMAGE_DEF = 'imageDetails',
+}
+
 @singleton()
-export class TaskSchema {
+export class TemplateSchema {
    taskDefinitionSchema: TaskDefinitionProps;
    containerDefinitions: Container[] = [];
 
@@ -62,7 +69,7 @@ export class TaskSchema {
       this.taskDefinitionSchema = { ...taskDefinitionSchema };
    }
 
-   public registerContainer(container: ContainerRaw) {
+   public registerContainer(container: ContainerRaw): void {
       const _container = {
          name: container.containerName,
          essential: container.essential,
@@ -72,13 +79,38 @@ export class TaskSchema {
       this.containerDefinitions.push({ ..._container });
    }
 
-   public produceTemplates() {
-      //
-   }
-}
+   public templateFactory(type: TemplateType): string {
+      const OUT_DIR = 'cdk.out/templates';
 
-export class StackDescriptor {
-   public static register(): void {
-      container.resolve(TaskSchema);
+      if (type === TemplateType.TASK_DEF) {
+         const template = new TaskDefTemplate(OUT_DIR, {
+            ...this.taskDefinitionSchema,
+            containerDefinitions: this.containerDefinitions,
+         });
+         return template.outFilePath;
+      }
+
+      if (type === TemplateType.IMAGE_DEF) {
+         const template = new ImageDefTemplate(
+            OUT_DIR,
+            this.containerDefinitions.map((container) => ({
+               name: container.name,
+               imageUri: container.image,
+            }))
+         );
+         return template.outFilePath;
+      }
+
+      if (type === TemplateType.APP_SPEC) {
+         const { name, portMappings } = this.containerDefinitions.find(
+            ({ essential }) => essential === true
+         );
+
+         const template = new AppSpecTemplate(OUT_DIR, {
+            ContainerPort: portMappings[0].containerPort,
+            ContainerName: name,
+         });
+         return template.outFilePath;
+      }
    }
 }
