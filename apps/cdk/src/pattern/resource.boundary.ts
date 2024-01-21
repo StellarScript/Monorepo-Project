@@ -5,7 +5,7 @@ import { Effect, ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import config from '@appify/shared/config';
 import { Arn } from '@appify/construct/arns';
 import { AlbConstruct as Alb } from '@appify/construct/alb';
-import { VipConstruct as Vpc } from '@appify/construct/vpc';
+import { VpcConstruct as Vpc } from '@appify/construct/vpc';
 import { SecurityGroupConstruct as SG } from '@appify/construct/securityGroup';
 
 export class BoundaryProps {

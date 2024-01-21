@@ -314,11 +314,7 @@ export default async function Index() {
                         </div>
                         <p>You can activate distributed tasks executions and caching by running:</p>
                         <pre>nx connect-to-nx-cloud</pre>
-                        <a
-                           href="https://nx.app/?utm_source=nx-project"
-                           target="_blank"
-                           rel="noreferrer"
-                        >
+                        <a href="https://nx.app/?utm_source=nx-project" target="_blank" rel="noreferrer">
                            {' '}
                            What is Nx Cloud?{' '}
                         </a>

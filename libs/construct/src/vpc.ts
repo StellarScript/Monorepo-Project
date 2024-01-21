@@ -7,16 +7,16 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Arn } from './arns';
 import { Parameter } from './parameter';
 
-export interface VipConstructProps extends Partial<VpcProps> {
+export interface VpcConstructProps extends Partial<VpcProps> {
    ipAddresses: IIpAddresses;
    exportName?: string;
    exportParameter?: boolean;
 }
 
-export class VipConstruct extends Vpc {
-   public static defaultExportName = '/vip/id';
+export class VpcConstruct extends Vpc {
+   public static defaultExportName = '/vpc/id';
 
-   constructor(scope: Construct, id: string, props: VipConstructProps) {
+   constructor(scope: Construct, id: string, props: VpcConstructProps) {
       super(scope, id, {
          subnetConfiguration: [
             {
@@ -39,8 +39,8 @@ export class VipConstruct extends Vpc {
       });
 
       if (props.exportParameter || props.exportName) {
-         new StringParameter(this, `${id}-vipParameter`, {
-            parameterName: props.exportName || VipConstruct.defaultExportName,
+         new StringParameter(this, `${id}-vpcParameter`, {
+            parameterName: props.exportName || VpcConstruct.defaultExportName,
             stringValue: this.vpcId,
          });
       }
@@ -48,7 +48,7 @@ export class VipConstruct extends Vpc {
 
    public static vpcLookup(scope: Construct, id: string, parameterName?: string): IVpc {
       return Vpc.fromLookup(scope, id, {
-         vpcId: Parameter.stringValue(scope, parameterName || VipConstruct.defaultExportName),
+         vpcId: Parameter.stringValue(scope, parameterName || VpcConstruct.defaultExportName),
       });
    }
 

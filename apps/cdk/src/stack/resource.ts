@@ -7,14 +7,14 @@ import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { ARecord, PublicHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 
 import config from '@appify/shared/config';
-import { VipConstruct } from '@appify/construct/vpc';
+import { VpcConstruct } from '@appify/construct/vpc';
 import { AlbConstruct } from '@appify/construct/alb';
 import { TagStack } from '@appify/construct/tagStack';
 import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
 import { ResourceStackPermssionBoundary } from '../pattern/resource.boundary';
 
 export class ResourceStack extends Stack {
-   public readonly vpc: VipConstruct;
+   public readonly vpc: VpcConstruct;
    public readonly alb: AlbConstruct;
    public readonly albSG: SecurityGroup;
    public readonly zone: IHostedZone;
@@ -22,7 +22,7 @@ export class ResourceStack extends Stack {
    constructor(scope: App, id: string, props?: StackProps) {
       super(scope, id, props);
 
-      this.vpc = new VipConstruct(this, 'default-vpc', {
+      this.vpc = new VpcConstruct(this, 'default-vpc', {
          ipAddresses: IpAddresses.cidr('10.0.0.0/16'),
          exportParameter: true,
          natGateways: 1,
@@ -62,9 +62,6 @@ export class ResourceStack extends Stack {
          vpc: this.vpc,
       });
 
-      new TagStack(this, [
-         { identity: config.inf.identifierTag },
-         { environment: config.inf.stage },
-      ]);
+      new TagStack(this, [{ identity: config.inf.identifierTag }, { environment: config.inf.stage }]);
    }
 }
