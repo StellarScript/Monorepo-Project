@@ -55,4 +55,8 @@ export class Arn {
    public static EcsService(region: string, account: string, id: string, name: string): string {
       return `arn:aws:ecs:${region}:${account}:service/${id}/${name}`;
    }
+
+   public static EcrImage(region: string, account: string, image: string, tag?: string): string {
+      return `${account}.dkr.ecr.${region}.amazonaws.com/${image}${tag ? `:${tag}` : ''}`;
+   }
 }

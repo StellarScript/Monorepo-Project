@@ -14,12 +14,13 @@ import type { IApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalanc
 import config from '@appify/shared/config';
 import { VpcConstruct } from '@appify/construct/vpc';
 import { AlbConstruct } from '@appify/construct/alb';
-import { TaskRole } from '@appify/construct/taskRole';
 import { Container } from '@appify/construct/container';
 import { TagStack } from '@appify/construct/tagStack';
 import { HealthCheck } from '@appify/construct/healthCheck';
 import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
 import { FargateServiceConstruct } from '@appify/construct/fargateService';
+import { TaskDefinitionConstruct } from '@appify/construct/taskDefinition';
+
 import { Containers, ImageTag } from '../pattern/constants';
 import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
 
@@ -59,10 +60,8 @@ export class EcsServiceStack extends Stack {
          containerInsights: true,
       });
 
-      this.taskDefinition = new FargateTaskDefinition(this, 'ecs-taskDefinition', {
-         executionRole: new TaskRole(this, 'ecs-execRole', 'TaskExecutionRole'),
-         taskRole: new TaskRole(this, 'ecs-taskRole', 'TaskDefinitionRole'),
-         family: 'appify',
+      this.taskDefinition = new TaskDefinitionConstruct(this, 'fargate-taskDefinition', {
+         family: TaskDefinitionConstruct.defaultFamilyName,
          memoryLimitMiB: 512,
          cpu: 256,
       });

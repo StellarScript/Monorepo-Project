@@ -7,6 +7,11 @@ export default {
       certificateArn: process.env['CERTIFICATE_ARN'],
    },
 
+   aws: {
+      account: process.env['AWS_ACCOUNT_ID'],
+      region: process.env['AWS_DEFAULT_REGION'],
+   },
+
    tokens: {
       doppler: process.env['DOPPLER_TOKEN'],
    },

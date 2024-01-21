@@ -5,6 +5,7 @@ import type {
 } from 'aws-cdk-lib/aws-ecs';
 import { ContainerImage, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
 import { RepositoryImage } from './repository';
+import { containerDescriptor } from './service.decorator';
 
 interface ContainerProps extends Partial<ContainerDefinitionOptions> {
    readonly tag: string;
@@ -17,6 +18,7 @@ export interface IContainer {
    readonly container: ContainerDefinition;
 }
 
+@containerDescriptor()
 export class Container implements IContainer {
    public readonly image: ContainerImage;
    public readonly logging?: AwsLogDriver;
