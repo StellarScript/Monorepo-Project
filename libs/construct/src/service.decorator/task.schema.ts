@@ -15,14 +15,16 @@ interface TaskDefinitionRaw extends Account {
    family: string;
    networkMode: string;
    compatibility: EcsCompatibility;
+   executionRoleName: string;
 }
 
 interface TaskDefinitionProps {
-   cpu: number;
-   memory: number;
+   cpu: string;
+   memory: string;
    family: string;
    networkMode: string;
    requiresCompatibilities: string[];
+   executionRoleArn: string;
 }
 
 interface ContainerRaw {
@@ -56,10 +58,11 @@ export class TemplateSchema {
    public registerTaskDefinition(taskDef: TaskDefinitionRaw): void {
       const taskDefinitionSchema = {
          family: taskDef.family,
-         cpu: Number(taskDef.cpu),
-         memory: Number(taskDef.memory),
+         cpu: taskDef.cpu,
+         memory: taskDef.memory,
          networkMode: taskDef.networkMode,
          requiresCompatibilities: [Compatibility[taskDef.compatibility]],
+         executionRoleArn: Arn.Role('ACCOUNT', taskDef.executionRoleName),
       };
       this.taskDefinitionSchema = { ...taskDefinitionSchema };
    }
@@ -69,7 +72,7 @@ export class TemplateSchema {
          name: container.containerName,
          essential: container.essential,
          portMappings: container.portMappings,
-         image: Arn.EcrImage('$REGION', '$ACCOUNT', container.imageName),
+         image: Arn.EcrImage('REGION', 'ACCOUNT', container.imageName.split('/')[1]),
       };
       this.containerDefinitions.push({ ..._container });
    }
@@ -89,8 +92,9 @@ export class TemplateSchema {
          const { name, portMappings } = this.containerDefinitions.find(
             ({ essential }) => essential === true
          );
+
          const template = new AppSpecTemplate(OUT_DIR, {
-            ContainerPort: portMappings[0].containerPort,
+            ContainerPort: portMappings[0].containerPort.toString(),
             ContainerName: name,
          });
          return template.outFilePath;

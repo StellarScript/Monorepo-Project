@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { sync } from 'write-yaml-file';
 
 abstract class Directory {
    protected abstract outDir: string;
@@ -35,17 +36,18 @@ export class TaskDefTemplate<T> extends Directory {
 export class AppSpecTemplate extends Directory {
    public static outFile = 'appspec.yaml';
 
-   constructor(protected outDir: string, content: { ContainerName: string; ContainerPort: number }) {
+   constructor(protected outDir: string, content: { ContainerName: string; ContainerPort: string }) {
       super();
+      this.outputPath = `${outDir}/${AppSpecTemplate.outFile}`;
 
-      this.generate(AppSpecTemplate.outFile, {
+      sync(this.outputPath, {
          version: 0,
          Resources: [
             {
                TargetService: {
                   Type: 'AWS::ECS::Service',
                   Properties: {
-                     TaskDefinition: '$TASK_DEFINITION_ARN',
+                     TaskDefinition: 'TASK_DEFINITION_ARN',
                      LoadBalancerInfo: content,
                   },
                },

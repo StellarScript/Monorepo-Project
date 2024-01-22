@@ -14,9 +14,11 @@ export class TaskDefinitionConstruct extends FargateTaskDefinition {
          family: TaskDefinitionConstruct.defaultFamilyName,
 
          taskRole: new Role(scope, 'TaskRole', {
+            roleName: 'TaskDefRole',
             assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
          }),
          executionRole: new Role(scope, 'TaskExecutionRole', {
+            roleName: 'TaskDefExecutionRole',
             assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
          }),
 

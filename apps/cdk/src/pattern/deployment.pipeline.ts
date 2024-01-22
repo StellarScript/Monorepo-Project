@@ -124,6 +124,8 @@ function BuildSpecTemplate() {
       phases: {
          build: {
             commands: [
+               'echo $ACCOUNT',
+               'echo $REGION',
                'aws s3 cp $TASK_DEF_TEMPLATE ./taskdef.json',
                'aws s3 cp $APP_SPEC_TEMPLATE ./appspec.yaml',
                'aws s3 cp $IMAGE_DETAILS_TEMPLATE ./imagedetails.json',
@@ -135,8 +137,15 @@ function BuildSpecTemplate() {
                'sed -i "s|REPOSITORY_URI|${REPOSITORY_URI}|g" taskdef.json',
                'sed -i "s|TASK_DEFINITION_ARN|${TASK_DEFINITION_ARN}|g" appspec.yaml',
 
+               'sed -i "s|ACCOUNT|${ACCOUNT}|g" taskdef.json',
+               'sed -i "s|REGION|${REGION}|g" taskdef.json',
+
+               'sed -i "s|ACCOUNT|${ACCOUNT}|g" imagedetails.json',
+               'sed -i "s|REGION|${REGION}|g" imagedetails.json',
+
                'cat appspec.yaml',
                'cat taskdef.json',
+               'cat imagedetails.json',
 
                'cp appspec.yaml ../',
                'cp taskdef.json ../',

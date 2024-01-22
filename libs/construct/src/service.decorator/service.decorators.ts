@@ -1,12 +1,11 @@
-import type { Stack } from 'aws-cdk-lib';
 import { container } from 'tsyringe';
-import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { TaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { Container } from '../container';
 import { TemplateSchema } from './task.schema';
 
 export function TaskDefinitionDescriptor() {
-   return function <T extends { new (...args: any[]): FargateTaskDefinition }>(constructor: T) {
+   return function <T extends { new (...args: any[]): TaskDefinition }>(constructor: T) {
       return class extends constructor {
          constructor(...args: any[]) {
             super(...args);
@@ -20,6 +19,7 @@ export function TaskDefinitionDescriptor() {
                compatibility: this.compatibility,
                region: this.stack.region,
                account: this.stack.account,
+               executionRoleName: this.executionRole['physicalName'],
             });
          }
       };

@@ -142,11 +142,11 @@ export class EcsServiceStack extends Stack {
          greenTargetGroup: this.greenTargetGroup,
       });
 
-      // new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
-      //    cluster: this.cluster,
-      //    securityGroup: this.serviceSG,
-      //    logDrivers: [serverContainer.logging, clientContainer.logging],
-      // });
+      new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
+         cluster: this.cluster,
+         securityGroup: this.serviceSG,
+         logDrivers: [serverContainer.logging, clientContainer.logging],
+      });
 
       new TagStack(this, [{ identity: config.inf.identifierTag }, { environment: config.inf.stage }]);
    }
