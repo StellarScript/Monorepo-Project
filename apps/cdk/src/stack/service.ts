@@ -23,6 +23,7 @@ import { TaskDefinitionConstruct } from '@appify/construct/taskDefinition';
 
 import { Containers, ImageTag } from '../pattern/constants';
 import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
+import { EcsDeploymentPipelineStack } from './pipeline';
 
 export class EcsServiceStack extends Stack {
    public readonly vpc: IVpc;
@@ -133,6 +134,13 @@ export class EcsServiceStack extends Stack {
       });
 
       this.fargateService.connections.allowFrom(this.alb, Port.tcp(443));
+
+      new EcsDeploymentPipelineStack(this, 'deployment-pipeline', {
+         listener: this.secureListener,
+         fargateService: this.fargateService,
+         blueTargetGroup: this.blueTargetGroup,
+         greenTargetGroup: this.greenTargetGroup,
+      });
 
       new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
          cluster: this.cluster,
