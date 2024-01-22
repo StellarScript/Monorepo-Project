@@ -85,17 +85,6 @@ export class TemplateSchema {
          return template.outFilePath;
       }
 
-      if (type === TemplateType.IMAGE_DEF) {
-         const template = new ImageDefTemplate(
-            OUT_DIR,
-            this.containerDefinitions.map((container) => ({
-               name: container.name,
-               imageUri: container.image,
-            }))
-         );
-         return template.outFilePath;
-      }
-
       if (type === TemplateType.APP_SPEC) {
          const { name, portMappings } = this.containerDefinitions.find(
             ({ essential }) => essential === true
@@ -104,6 +93,17 @@ export class TemplateSchema {
             ContainerPort: portMappings[0].containerPort,
             ContainerName: name,
          });
+         return template.outFilePath;
+      }
+
+      if (type === TemplateType.IMAGE_DEF) {
+         const template = new ImageDefTemplate(
+            OUT_DIR,
+            this.containerDefinitions?.map((container) => ({
+               name: container.name,
+               imageUri: container.image,
+            }))
+         );
          return template.outFilePath;
       }
    }

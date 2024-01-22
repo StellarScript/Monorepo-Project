@@ -1,5 +1,4 @@
 import type { Construct } from 'constructs';
-import type { IGrantable } from 'aws-cdk-lib/aws-iam';
 
 import { container } from 'tsyringe';
 import { Asset } from 'aws-cdk-lib/aws-s3-assets';

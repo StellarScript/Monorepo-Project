@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
 import 'reflect-metadata';
+import 'source-map-support/register';
 
 import { App } from 'aws-cdk-lib';
 import config from '@appify/shared/config';

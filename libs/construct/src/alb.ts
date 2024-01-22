@@ -27,10 +27,11 @@ export class AlbConstruct extends ApplicationLoadBalancer {
       }
    }
 
-   public static albLookup(scope: Construct, id: string, loadBalancerArn?: string) {
+   public static albLookup(scope: Construct, id: string, securityGroupId?: string) {
       const paramterValue = Parameter.stringValue(scope, AlbConstruct.defaultExportName);
-      return ApplicationLoadBalancer.fromLookup(scope, id, {
-         loadBalancerArn: loadBalancerArn || paramterValue,
+      return ApplicationLoadBalancer.fromApplicationLoadBalancerAttributes(scope, id, {
+         loadBalancerArn: paramterValue,
+         securityGroupId: securityGroupId,
       });
    }
 

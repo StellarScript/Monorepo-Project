@@ -12,7 +12,7 @@ export interface SecurityGroupConstructProps extends Partial<SecurityGroupProps>
 }
 
 export class SecurityGroupConstruct extends SecurityGroup {
-   public static defaultExportName = '/vip/id';
+   public static defaultExportName = '/securityGroup/id';
 
    constructor(scope: Construct, id: string, props: SecurityGroupConstructProps) {
       super(scope, id, props);

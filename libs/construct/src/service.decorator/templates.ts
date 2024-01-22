@@ -60,5 +60,6 @@ export class ImageDefTemplate<T> extends Directory {
 
    constructor(protected outDir: string, content: T) {
       super();
+      this.generate(ImageDefTemplate.outFile, content);
    }
 }

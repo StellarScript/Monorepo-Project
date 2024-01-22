@@ -20,6 +20,10 @@ export default defineConfig({
    resolve: {
       alias: {
          '@appify/shared/config': path.resolve(__dirname, '../../libs/shared/src/config/index.ts'),
+         '@appify/construct/service.decorator': path.resolve(
+            __dirname,
+            '../../libs/construct/src/service.decorator'
+         ),
       },
    },
    root: 'apps/cdk',

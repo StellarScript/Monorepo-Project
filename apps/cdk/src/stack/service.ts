@@ -21,9 +21,9 @@ import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
 import { FargateServiceConstruct } from '@appify/construct/fargateService';
 import { TaskDefinitionConstruct } from '@appify/construct/taskDefinition';
 
+import { EcsDeploymentPipelineStack } from './pipeline';
 import { Containers, ImageTag } from '../pattern/constants';
 import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
-import { EcsDeploymentPipelineStack } from './pipeline';
 
 export class EcsServiceStack extends Stack {
    public readonly vpc: IVpc;
@@ -57,8 +57,8 @@ export class EcsServiceStack extends Stack {
        * Ecs Resources
        */
       this.cluster = new Cluster(this, 'ecs-cluster', {
-         vpc: this.vpc,
          containerInsights: true,
+         vpc: this.vpc,
       });
 
       this.taskDefinition = new TaskDefinitionConstruct(this, 'fargate-taskDefinition', {
@@ -142,11 +142,11 @@ export class EcsServiceStack extends Stack {
          greenTargetGroup: this.greenTargetGroup,
       });
 
-      new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
-         cluster: this.cluster,
-         securityGroup: this.serviceSG,
-         logDrivers: [serverContainer.logging, clientContainer.logging],
-      });
+      // new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
+      //    cluster: this.cluster,
+      //    securityGroup: this.serviceSG,
+      //    logDrivers: [serverContainer.logging, clientContainer.logging],
+      // });
 
       new TagStack(this, [{ identity: config.inf.identifierTag }, { environment: config.inf.stage }]);
    }

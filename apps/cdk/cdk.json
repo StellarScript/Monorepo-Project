@@ -3,7 +3,7 @@
    "output": "../../dist/apps/cdk",
    "requireApproval": "never",
    "watch": {
-      "include": ["**"],
+      "include": ["./src/**/*"],
       "exclude": [
          "README.md",
          "cdk*.json",
