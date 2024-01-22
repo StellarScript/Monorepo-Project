@@ -19,15 +19,15 @@ import { CodeBuildProject } from '@appify/construct/codebuild-project';
 import { TemplateAsset, TemplateType } from '@appify/construct/service.decorator';
 import { ImageTag } from '../pattern/constants';
 
-export interface EcsDeploymentPipelineStackProps {
+export interface EcsDeploymentPipelineProps {
    readonly fargateService: FargateService;
    readonly listener: ApplicationListener;
    readonly blueTargetGroup: ApplicationTargetGroup;
    readonly greenTargetGroup: ApplicationTargetGroup;
 }
 
-export class EcsDeploymentPipelineStack extends Construct {
-   constructor(scope: Construct, id: string, props: EcsDeploymentPipelineStackProps) {
+export class EcsDeploymentPipeline extends Construct {
+   constructor(scope: Construct, id: string, props: EcsDeploymentPipelineProps) {
       super(scope, id);
 
       const clientSource = new Artifact('ClientSource');

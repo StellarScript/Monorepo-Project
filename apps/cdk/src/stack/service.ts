@@ -22,7 +22,7 @@ import { FargateServiceConstruct } from '@appify/construct/fargateService';
 import { TaskDefinitionConstruct } from '@appify/construct/taskDefinition';
 
 import { Containers, ImageTag } from '../pattern/constants';
-import { EcsDeploymentPipelineStack } from '../pattern/deployment.pipeline';
+import { EcsDeploymentPipeline } from '../pattern/deployment.pipeline';
 import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
 
 export class EcsServiceStack extends Stack {
@@ -40,6 +40,9 @@ export class EcsServiceStack extends Stack {
    public readonly greenTargetGroup: ApplicationTargetGroup;
    public readonly testListener: ApplicationListener;
    public readonly secureListener: ApplicationListener;
+
+   public readonly deploymentPipeline: EcsDeploymentPipeline;
+   public readonly serviceBoundary: ServiceStackPermssionBoundary;
 
    constructor(scope: Construct, id: string, props: StackProps) {
       super(scope, id, props);
@@ -135,14 +138,14 @@ export class EcsServiceStack extends Stack {
 
       this.fargateService.connections.allowFrom(this.alb, Port.tcp(443));
 
-      new EcsDeploymentPipelineStack(this, 'deployment-pipeline', {
+      this.deploymentPipeline = new EcsDeploymentPipeline(this, 'deployment-pipeline', {
          listener: this.secureListener,
          fargateService: this.fargateService,
          blueTargetGroup: this.blueTargetGroup,
          greenTargetGroup: this.greenTargetGroup,
       });
 
-      new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
+      this.serviceBoundary = new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
          cluster: this.cluster,
          securityGroup: this.serviceSG,
          logDrivers: [serverContainer.logging, clientContainer.logging],
