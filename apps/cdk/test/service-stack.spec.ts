@@ -84,4 +84,35 @@ describe('Service Stack', () => {
          Port: 443,
       });
    });
+
+   it('service stack blue target group', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
+         HealthCheckPath: '/',
+         HealthCheckTimeoutSeconds: 5,
+         HealthyThresholdCount: 2,
+         Port: 3000,
+         Protocol: 'HTTP',
+         TargetType: 'ip',
+         VpcId: 'vpc-12345',
+         UnhealthyThresholdCount: 2,
+         Matcher: { HttpCode: '200-299' },
+         TargetGroupAttributes: [{ Key: 'stickiness.enabled', Value: 'false' }],
+      });
+   });
+
+   it('service stack green target group', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
+         HealthCheckPath: '/',
+         HealthCheckTimeoutSeconds: 5,
+         HealthyThresholdCount: 2,
+         Port: 3000,
+         Protocol: 'HTTP',
+         TargetType: 'ip',
+         VpcId: 'vpc-12345',
+         UnhealthyThresholdCount: 2,
+         Matcher: { HttpCode: '200-299' },
+      });
+   });
 });
