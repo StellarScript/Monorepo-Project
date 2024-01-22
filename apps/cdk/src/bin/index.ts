@@ -1,18 +1,21 @@
 #!/usr/bin/env node
+import 'reflect-metadata';
 import 'source-map-support/register';
 
 import { App } from 'aws-cdk-lib';
-import configuration from '@appify/shared/config';
+import config from '@appify/shared/config';
+import { StackDescriptor } from '@appify/construct/service.decorator';
+
 import { ResourceStack } from '../stack/resource';
 import { EcsServiceStack } from '../stack/service';
 
+StackDescriptor.register();
+
 const app = new App();
 const env = {
-   region: configuration.aws.region,
-   account: configuration.aws.account,
+   region: config.aws.region,
+   account: config.aws.account,
 };
 
 new ResourceStack(app, 'resource', { env });
 new EcsServiceStack(app, 'service', { env });
-
-app.synth();

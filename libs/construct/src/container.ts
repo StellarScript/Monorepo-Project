@@ -1,26 +1,25 @@
-import { Construct } from 'constructs';
-import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { ContainerImage, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
-
 import type {
    TaskDefinition,
    ContainerDefinition,
    ContainerDefinitionOptions,
 } from 'aws-cdk-lib/aws-ecs';
-
-export class RepositoryImage {
-   public static FromRepository(scope: Construct, name: string, tag: string): ContainerImage {
-      const repository = Repository.fromRepositoryName(scope, `${name}-image`, name);
-      return ContainerImage.fromEcrRepository(repository, tag);
-   }
-}
+import { ContainerImage, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
+import { ContainerDescriptor } from './service.decorator';
+import { RepositoryImage } from './repository';
 
 interface ContainerProps extends Partial<ContainerDefinitionOptions> {
    readonly tag: string;
    readonly log?: boolean;
 }
 
-export class Container {
+export interface IContainer {
+   readonly image: ContainerImage;
+   readonly logging?: AwsLogDriver;
+   readonly container: ContainerDefinition;
+}
+
+@ContainerDescriptor()
+export class Container implements IContainer {
    public readonly image: ContainerImage;
    public readonly logging?: AwsLogDriver;
    public readonly container: ContainerDefinition;
@@ -33,8 +32,6 @@ export class Container {
          ...props,
          image: this.image,
          logging: this.logging,
-         containerName: containerName,
-         cpu: props.cpu,
       });
    }
 }

@@ -4,13 +4,54 @@
    "sourceRoot": "apps/client",
    "projectType": "application",
    "targets": {
+      "build": {
+         "executor": "@nx/next:build",
+         "outputs": ["{options.outputPath}"],
+         "defaultConfiguration": "production",
+         "options": {
+            "outputPath": "dist/apps/client"
+         },
+         "configurations": {
+            "development": {
+               "outputPath": "apps/client"
+            },
+            "production": {}
+         }
+      },
+      "serve": {
+         "executor": "@nx/next:server",
+         "defaultConfiguration": "development",
+         "options": {
+            "buildTarget": "client:build",
+            "dev": true
+         },
+         "configurations": {
+            "development": {
+               "buildTarget": "client:build:development",
+               "dev": true
+            },
+            "production": {
+               "buildTarget": "client:build:production",
+               "dev": false
+            }
+         }
+      },
+      "export": {
+         "executor": "@nx/next:export",
+         "options": {
+            "buildTarget": "client:build:production"
+         }
+      },
       "test": {
          "executor": "@nx/vite:test",
-         "options": {}
+         "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+         "options": {
+            "config": "apps/client/vitest.config.ts"
+         }
       },
-      "docker-build": {
-         "dependsOn": ["build"],
-         "command": "docker build -f apps/client/Dockerfile . -t client"
+      "lint": {
+         "executor": "@nx/eslint:lint",
+         "outputs": ["{options.outputFile}"]
       }
    },
    "tags": []

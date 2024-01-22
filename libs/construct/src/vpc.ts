@@ -1,20 +1,22 @@
 import type { Construct } from 'constructs';
-import type { IIpAddresses, IVpc } from 'aws-cdk-lib/aws-ec2';
+import type { IIpAddresses, IVpc, VpcProps } from 'aws-cdk-lib/aws-ec2';
 
-import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { Vpc as VpcConstruct, VpcProps as VpcConstructProps } from 'aws-cdk-lib/aws-ec2';
-import { Parameter } from './paramter';
 
-export interface VpcProps extends Partial<VpcConstructProps> {
-   ipAddresses?: IIpAddresses;
-   parameterName?: string;
+import { Arn } from './arns';
+import { Parameter } from './parameter';
+
+export interface VpcConstructProps extends Partial<VpcProps> {
+   ipAddresses: IIpAddresses;
+   exportName?: string;
+   exportParameter?: boolean;
 }
 
-export class Vpc extends VpcConstruct {
-   static readonly exportParamterName = '/vpc/id';
+export class VpcConstruct extends Vpc {
+   public static defaultExportName = '/vpc/id';
 
-   constructor(scope: Construct, id: string, props: VpcProps) {
+   constructor(scope: Construct, id: string, props: VpcConstructProps) {
       super(scope, id, {
          subnetConfiguration: [
             {
@@ -36,54 +38,47 @@ export class Vpc extends VpcConstruct {
          ...props,
       });
 
-      new StringParameter(this, 'VpcId', {
-         stringValue: this.vpcId,
-         parameterName: props.parameterName || Vpc.exportParamterName,
-      });
+      if (props.exportParameter || props.exportName) {
+         new StringParameter(this, `${id}-vpcParameter`, {
+            parameterName: props.exportName || VpcConstruct.defaultExportName,
+            stringValue: this.vpcId,
+         });
+      }
    }
 
    public static vpcLookup(scope: Construct, id: string, parameterName?: string): IVpc {
       return Vpc.fromLookup(scope, id, {
-         vpcId: Parameter.stringValue(scope, parameterName || Vpc.exportParamterName),
+         vpcId: Parameter.stringValue(scope, parameterName || VpcConstruct.defaultExportName),
       });
    }
 
-   public static getArn(vpc: Vpc): string {
-      return `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:vpc/${vpc.vpcId}`;
+   public static vpcArn(vpc: Vpc): string {
+      return Arn.Vpc(vpc.stack.region, vpc.stack.account, vpc.vpcId);
    }
 
-   public static getInternetGatewayArn(vpc: Vpc): string {
-      return `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:internet-gateway/${vpc.internetGatewayId}`;
+   public static subnetIds(vpc: IVpc): string[] {
+      const subnets = [vpc.publicSubnets, vpc.isolatedSubnets, vpc.privateSubnets].flat();
+      return subnets.map((subnet) => subnet.subnetId);
    }
 
-   public static getAllSubnetIds(vpc: IVpc): string[] {
-      return [
-         vpc.privateSubnets.map((subnet) => subnet.subnetId),
-         vpc.publicSubnets.map((subnet) => subnet.subnetId),
-         vpc.isolatedSubnets.map((subnet) => subnet.subnetId),
-      ].flat();
+   public static routeTableIds(vpc: IVpc): string[] {
+      const subnets = [vpc.publicSubnets, vpc.isolatedSubnets, vpc.privateSubnets].flat();
+      return subnets.map((subnet) => subnet.routeTable.routeTableId);
    }
 
-   public static getAllSubnetArns(vpc: IVpc): string[] {
-      const subnetIds = this.getAllSubnetIds(vpc);
-      return subnetIds.map(
-         (subnetId) => `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:subnet/${subnetId}`
+   public static subnetArns(vpc: IVpc): string[] {
+      return this.subnetIds(vpc).map((subnetId) =>
+         Arn.VpcSubnet(vpc.stack.region, vpc.stack.account, subnetId)
       );
    }
 
-   public static getAllRouteTableIds(vpc: IVpc): string[] {
-      return [
-         vpc.publicSubnets.map((subnet) => subnet.routeTable.routeTableId),
-         vpc.isolatedSubnets.map((subnet) => subnet.routeTable.routeTableId),
-         vpc.privateSubnets.map((subnet) => subnet.routeTable.routeTableId),
-      ].flat();
+   public static routeTabeArns(vpc: IVpc): string[] {
+      return this.routeTableIds(vpc).map((routeTableId) =>
+         Arn.VpcRouteTable(vpc.stack.region, vpc.stack.account, routeTableId)
+      );
    }
 
-   public static getAllRouteTableArns(vpc: IVpc): string[] {
-      const routeTableIds = this.getAllRouteTableIds(vpc);
-      return routeTableIds.map(
-         (routeTableId) =>
-            `arn:aws:ec2:${vpc.stack.region}:${vpc.stack.account}:route-table/${routeTableId}`
-      );
+   public static internetGatewayArn(vpc: Vpc): string {
+      return Arn.VpcInternetGateway(vpc.stack.region, vpc.stack.account, vpc.internetGatewayId);
    }
 }

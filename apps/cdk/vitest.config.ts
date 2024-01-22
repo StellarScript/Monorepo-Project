@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import * as path from 'path';
 
 export default defineConfig({
    plugins: [nxViteTsPaths()],
@@ -16,4 +17,14 @@ export default defineConfig({
          provider: 'v8',
       },
    },
+   resolve: {
+      alias: {
+         '@appify/shared/config': path.resolve(__dirname, '../../libs/shared/src/config/index.ts'),
+         '@appify/construct/service.decorator': path.resolve(
+            __dirname,
+            '../../libs/construct/src/service.decorator'
+         ),
+      },
+   },
+   root: 'apps/cdk',
 });

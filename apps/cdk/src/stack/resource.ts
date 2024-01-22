@@ -1,69 +1,67 @@
-import { Stack, Tag, CfnOutput } from 'aws-cdk-lib';
 import type { App, StackProps } from 'aws-cdk-lib';
 import type { IHostedZone } from 'aws-cdk-lib/aws-route53';
 
-import { IpAddresses } from 'aws-cdk-lib/aws-ec2';
+import { Stack } from 'aws-cdk-lib';
+import { IpAddresses, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { LoadBalancerTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { ARecord, PublicHostedZone, RecordTarget } from 'aws-cdk-lib/aws-route53';
 
 import config from '@appify/shared/config';
-import { Vpc } from '@appify/construct/vpc';
-import { Loadbalancer } from '@appify/construct/loadBalancer';
-import { SecurityGroup } from '@appify/construct/securityGroup';
-import { ResourceStackPermssionBoundary } from '@appify/construct/permissions/resource.boundary';
+import { VpcConstruct } from '@appify/construct/vpc';
+import { AlbConstruct } from '@appify/construct/alb';
+import { TagStack } from '@appify/construct/tagStack';
+import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
+import { ResourceStackPermssionBoundary } from '../pattern/resource.boundary';
 
 export class ResourceStack extends Stack {
-   public readonly vpc: Vpc;
+   public readonly vpc: VpcConstruct;
+   public readonly alb: AlbConstruct;
+   public readonly albSG: SecurityGroup;
    public readonly zone: IHostedZone;
-
-   public readonly loadBalancer: Loadbalancer;
-   public readonly albSecurityGroup: SecurityGroup;
 
    constructor(scope: App, id: string, props?: StackProps) {
       super(scope, id, props);
 
-      this.vpc = new Vpc(this, 'DefaultVpc', {
-         maxAzs: 3,
-         natGateways: 1,
+      this.vpc = new VpcConstruct(this, 'default-vpc', {
          ipAddresses: IpAddresses.cidr('10.0.0.0/16'),
+         exportParameter: true,
+         natGateways: 1,
+         maxAzs: 3,
       });
 
-      this.loadBalancer = new Loadbalancer(this, 'DefaultAlb', {
-         vpc: this.vpc,
-         internetFacing: true,
+      this.alb = new AlbConstruct(this, 'default-alb', {
          vpcSubnets: { subnets: this.vpc.publicSubnets },
-      });
-
-      this.albSecurityGroup = new SecurityGroup(this, 'AlbSecurityGroup', {
+         exportParameter: true,
+         internetFacing: true,
          vpc: this.vpc,
-         allowAllOutbound: true,
-         description: 'Security Group for Load Balancer',
       });
 
-      this.loadBalancer.addSecurityGroup(this.albSecurityGroup);
+      this.albSG = new SecurityGroupConstruct(this, 'alb-securityGroup', {
+         description: 'Security Group for Load Balancer',
+         exportParameter: true,
+         allowAllOutbound: true,
+         vpc: this.vpc,
+      });
 
-      this.zone = PublicHostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      this.zone = PublicHostedZone.fromHostedZoneAttributes(this, 'hosted-zone', {
          hostedZoneId: config.inf.hostedZoneId,
          zoneName: config.inf.hostedZoneDomain,
       });
 
-      new ARecord(this, 'AlbARecord', {
-         target: RecordTarget.fromAlias(new LoadBalancerTarget(this.loadBalancer)),
+      new ARecord(this, 'alb-record', {
+         target: RecordTarget.fromAlias(new LoadBalancerTarget(this.alb)),
          recordName: config.inf.hostedZoneDomain,
          zone: this.zone,
       });
 
-      new ResourceStackPermssionBoundary(this, 'ResourceStackPermssion', {
+      this.alb.addSecurityGroup(this.albSG);
+
+      new ResourceStackPermssionBoundary(this, 'resource-permission-boundary', {
+         securityGroup: this.albSG,
+         loadBalancer: this.alb,
          vpc: this.vpc,
-         loadBalancer: this.loadBalancer,
-         securityGroup: this.albSecurityGroup,
       });
 
-      new Tag('environment', config.inf.stage).visit(this);
-
-      new CfnOutput(this, 'AlbArn', {
-         exportName: 'albArn',
-         value: this.loadBalancer.loadBalancerArn,
-      });
+      new TagStack(this, [{ identity: config.inf.identifierTag }, { environment: config.inf.stage }]);
    }
 }

@@ -16,7 +16,7 @@
             "name": "next"
          }
       ],
-      "types": ["jest", "node"]
+      "types": ["vitest", "node"]
    },
    "include": [
       "**/*.ts",
@@ -27,11 +27,5 @@
       "../../dist/apps/client/.next/types/**/*.ts",
       "next-env.d.ts"
    ],
-   "exclude": [
-      "node_modules",
-      "jest.config.ts",
-      "src/**/*.spec.ts",
-      "src/**/*.test.ts",
-      "vite.config.ts"
-   ]
+   "exclude": ["node_modules", "vitest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }

@@ -23,7 +23,9 @@
       "test": {
          "executor": "@nx/vite:test",
          "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-         "options": {}
+         "options": {
+            "config": "apps/cdk/vitest.config.ts"
+         }
       },
       "lint": {
          "executor": "@nx/eslint:lint",

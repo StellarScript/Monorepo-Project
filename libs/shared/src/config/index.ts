@@ -1,37 +1,10 @@
-const configuration = {
-   config: {
-      stage: process.env['STAGE'],
-      projectName: process.env['PROJECT_NAME'],
-      frontendUrl: process.env['FRONTEND_URL'],
-      backendUrl: process.env['BACKEND_URL'],
-      serverPort: process.env['SERVER_PORT'],
-   },
-
-   auth0: {
-      domain: process.env['AUTH0_DOMAIN'],
-      clientId: process.env['AUTH0_CLIENT_ID'],
-      clientSecret: process.env['AUTH0_CLIENT_SECRET'],
-      audience: process.env['AUTH0_AUDIENCE'],
-      apikey: process.env['AUTH0_API_KEY'],
-      issuer: process.env['AUTH0_ISSUER_BASE_URL'],
-   },
-
+export default {
    inf: {
       stage: process.env['STAGE'],
+      identifierTag: process.env['IDENTIFIER_TAG'],
       hostedZoneId: process.env['HOSTED_ZONE_ID'],
       hostedZoneDomain: process.env['HOSTED_ZONE_DOMAIN'],
       certificateArn: process.env['CERTIFICATE_ARN'],
-   },
-
-   database: {
-      port: Number(process.env['DATABASE_PORT']),
-      password: process.env['DATABASE_PASSWORD'],
-      identifier: process.env['DATABASE_IDENTIFIER'],
-   },
-
-   redis: {
-      sessionSecret: process.env['SESSION_SECRET'],
-      redisUri: process.env['REDIS_URI'],
    },
 
    aws: {
@@ -40,9 +13,6 @@ const configuration = {
    },
 
    tokens: {
-      dopperToken: process.env['DOPPLER_TOKEN'],
+      doppler: process.env['DOPPLER_TOKEN'],
    },
 };
-
-export type Configuration = typeof configuration;
-export default configuration as typeof configuration;

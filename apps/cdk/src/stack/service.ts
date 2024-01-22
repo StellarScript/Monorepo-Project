@@ -1,102 +1,97 @@
-import { Stack, Tag } from 'aws-cdk-lib';
-
-import type { Construct } from 'constructs';
-import type { StackProps } from 'aws-cdk-lib';
-import {
-   ApplicationListener,
-   ApplicationProtocol,
-   ApplicationTargetGroup,
-   type IApplicationLoadBalancer,
-} from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import type { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import type { ISecurityGroup, IVpc } from 'aws-cdk-lib/aws-ec2';
-
-import { Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Stack, StackProps } from 'aws-cdk-lib';
+import { Port } from 'aws-cdk-lib/aws-ec2';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Cluster, FargateService, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
+import { ApplicationProtocol, ApplicationTargetGroup } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+
+import type { Construct } from 'constructs';
+import type { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import type { ISecurityGroup, IVpc } from 'aws-cdk-lib/aws-ec2';
+import type { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
+import type { ApplicationListener } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import type { IApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 
 import config from '@appify/shared/config';
-import { Vpc } from '@appify/construct/vpc';
-import { Loadbalancer } from '@appify/construct/loadBalancer';
-import { SecurityGroup } from '@appify/construct/securityGroup';
-
-import { TaskRole } from '@appify/construct/ecs-role';
+import { VpcConstruct } from '@appify/construct/vpc';
+import { AlbConstruct } from '@appify/construct/alb';
 import { Container } from '@appify/construct/container';
+import { TagStack } from '@appify/construct/tagStack';
 import { HealthCheck } from '@appify/construct/healthCheck';
-import { ServiceStackPermssionBoundary } from '@appify/construct/permissions/service.boundary';
+import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
+import { FargateServiceConstruct } from '@appify/construct/fargateService';
+import { TaskDefinitionConstruct } from '@appify/construct/taskDefinition';
 
-enum Containers {
-   Server = 'server',
-   Client = 'client',
-}
+import { Containers, ImageTag } from '../pattern/constants';
+import { EcsDeploymentPipelineStack } from '../pattern/deployment.pipeline';
+import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
 
 export class EcsServiceStack extends Stack {
    public readonly vpc: IVpc;
    public readonly albSG: ISecurityGroup;
-   public readonly loadBalancer: IApplicationLoadBalancer;
+   public readonly alb: IApplicationLoadBalancer;
    public readonly certificate: ICertificate;
 
    public readonly cluster: Cluster;
    public readonly serviceSG: SecurityGroup;
    public readonly fargateService: FargateService;
    public readonly taskDefinition: FargateTaskDefinition;
-   public readonly appTargetGroup: ApplicationTargetGroup;
+
+   public readonly blueTargetGroup: ApplicationTargetGroup;
+   public readonly greenTargetGroup: ApplicationTargetGroup;
+   public readonly testListener: ApplicationListener;
    public readonly secureListener: ApplicationListener;
 
    constructor(scope: Construct, id: string, props: StackProps) {
       super(scope, id, props);
 
-      // Lookup existing resources
-      this.vpc = Vpc.vpcLookup(this, 'VpcLookup');
-      this.albSG = SecurityGroup.securityGroupLookup(this, 'SecurityGroupLookup');
-      this.loadBalancer = Loadbalancer.loadbalancerLookup(this, 'AlbLookup', this.albSG.securityGroupId);
-      this.certificate = Certificate.fromCertificateArn(this, 'CertLookup', config.inf.certificateArn);
+      /**
+       * Existing Resources
+       */
+      this.vpc = VpcConstruct.vpcLookup(this, 'vpc-lookup');
+      this.alb = AlbConstruct.albLookup(this, 'alb-lookup');
+      this.albSG = SecurityGroupConstruct.securityGroupLookup(this, 'securitygroup-lookup');
+      this.certificate = Certificate.fromCertificateArn(this, 'cert-lookup', config.inf.certificateArn);
 
-      // Create new resources
-      this.cluster = new Cluster(this, 'EcsCluster', {
-         vpc: this.vpc,
+      /**
+       *
+       * Ecs Resources
+       */
+      this.cluster = new Cluster(this, 'ecs-cluster', {
          containerInsights: true,
+         vpc: this.vpc,
       });
 
-      this.taskDefinition = new FargateTaskDefinition(this, 'EcsTaskDefinition', {
-         taskRole: new TaskRole(this, 'EcsTaskRole'),
-         executionRole: new TaskRole(this, 'ExecutionRole'),
-         memoryLimitMiB: 4096,
-         cpu: 2048,
+      this.taskDefinition = new TaskDefinitionConstruct(this, 'fargate-taskDefinition', {
+         family: TaskDefinitionConstruct.defaultFamilyName,
+         memoryLimitMiB: 512,
+         cpu: 256,
       });
 
       const serverContainer = new Container(this.taskDefinition, Containers.Server, {
          portMappings: [{ containerPort: 8080 }],
-         memoryLimitMiB: 1024,
-         cpu: 1024,
+         tag: ImageTag.Latest,
          log: true,
-         tag: 'latest',
          environment: {
-            DOPPLER_TOKEN: config.tokens.dopperToken,
+            DOPPLER_TOKEN: config.tokens.doppler,
          },
       });
       const clientContainer = new Container(this.taskDefinition, Containers.Client, {
          portMappings: [{ containerPort: 3000 }],
-         memoryLimitMiB: 2048,
-         cpu: 1024,
-         tag: 'latest',
+         tag: ImageTag.Latest,
+         essential: true,
          log: true,
       });
 
-      this.serviceSG = new SecurityGroup(this, 'Service-SecurityGroup', {
+      this.serviceSG = new SecurityGroupConstruct(this, 'service-securityGroup', {
          description: 'Ecs Fargate Service Security Group',
-         exportName: 'ServiceSecurityGroup',
          allowAllOutbound: true,
          vpc: this.vpc,
       });
 
-      this.fargateService = new FargateService(this, 'FargateSrvice', {
-         vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+      this.fargateService = new FargateServiceConstruct(this, 'fargate-service', {
          securityGroups: [this.serviceSG],
          taskDefinition: this.taskDefinition,
          cluster: this.cluster,
-         enableExecuteCommand: true,
-         assignPublicIp: false,
          desiredCount: 1,
       });
 
@@ -105,7 +100,7 @@ export class EcsServiceStack extends Stack {
          containerPort: 3000,
       });
 
-      this.appTargetGroup = new ApplicationTargetGroup(this, 'ClientTargetGroup', {
+      this.blueTargetGroup = new ApplicationTargetGroup(this, 'blue-targetGroup', {
          targets: [clientTargetGroup],
          protocol: ApplicationProtocol.HTTP,
          healthCheck: new HealthCheck({ path: '/' }),
@@ -113,27 +108,46 @@ export class EcsServiceStack extends Stack {
          port: 3000,
       });
 
-      this.secureListener = this.loadBalancer.addListener('SecureListener', {
+      this.greenTargetGroup = new ApplicationTargetGroup(this, 'green-targetGroup', {
+         targets: [clientTargetGroup],
+         protocol: ApplicationProtocol.HTTP,
+         healthCheck: new HealthCheck({ path: '/' }),
+         vpc: this.vpc,
+         port: 3000,
+      });
+
+      this.testListener = this.alb.addListener('test-listenerGroup', {
+         port: 3000,
+         protocol: ApplicationProtocol.HTTP,
+      });
+      this.testListener.addTargetGroups('test-listenerGroup', {
+         targetGroups: [this.greenTargetGroup],
+      });
+
+      this.secureListener = this.alb.addListener('secure-listener', {
          certificates: [this.certificate],
          open: true,
          port: 443,
       });
-
-      this.secureListener.addTargetGroups('TargetListenerGroup', {
-         targetGroups: [this.appTargetGroup],
+      this.secureListener.addTargetGroups('target-listenerGroup', {
+         targetGroups: [this.blueTargetGroup],
       });
 
-      this.fargateService.connections.allowFrom(this.loadBalancer, Port.tcp(443));
+      this.fargateService.connections.allowFrom(this.alb, Port.tcp(443));
 
-      new ServiceStackPermssionBoundary(this, 'ServiceStackPermissionBoundary', {
-         vpc: this.vpc,
+      new EcsDeploymentPipelineStack(this, 'deployment-pipeline', {
+         listener: this.secureListener,
+         fargateService: this.fargateService,
+         blueTargetGroup: this.blueTargetGroup,
+         greenTargetGroup: this.greenTargetGroup,
+      });
+
+      new ServiceStackPermssionBoundary(this, 'service-permissionBoundary', {
          cluster: this.cluster,
          securityGroup: this.serviceSG,
-         loadBalancer: this.loadBalancer,
-         targetGroups: [this.appTargetGroup],
          logDrivers: [serverContainer.logging, clientContainer.logging],
       });
 
-      new Tag('environment', config.inf.stage).visit(this);
+      new TagStack(this, [{ identity: config.inf.identifierTag }, { environment: config.inf.stage }]);
    }
 }

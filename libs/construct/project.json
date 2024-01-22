@@ -21,9 +21,11 @@
          "options": {}
       },
       "test": {
-         "executor": "@nx/vite:test",
+         "executor": "@nx/jest:jest",
          "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-         "options": {}
+         "options": {
+            "jestConfig": "libs/construct/jest.config.ts"
+         }
       },
       "lint": {
          "executor": "@nx/eslint:lint",
