@@ -1,4 +1,7 @@
 export default {
+   app: {
+      environment: process.env['ENVIRONMENT'],
+   },
    inf: {
       stage: process.env['STAGE'],
       identifierTag: process.env['IDENTIFIER_TAG'],

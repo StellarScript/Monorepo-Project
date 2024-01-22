@@ -1,0 +1,9 @@
+node_modules
+node_modules/*
+tmp
+.next
+dist
+.env
+.nx
+.vscode 
+.husky

@@ -42,6 +42,7 @@ Thumbs.db
 # Next.js
 .next
 .nx/cache
+.env.local
 
 # AWS CDK
 cdk.out
