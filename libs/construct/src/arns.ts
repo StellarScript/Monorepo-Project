@@ -59,4 +59,8 @@ export class Arn {
    public static EcrImage(region: string, account: string, image: string, tag?: string): string {
       return `${account}.dkr.ecr.${region}.amazonaws.com/${image}${tag ? `:${tag}` : ''}`;
    }
+
+   public static ElasticLoadBalancer(region: string, account: string, name: string, id: string): string {
+      return `arn:aws:elasticloadbalancing:${region}:${account}:loadbalancer/application/${name}/${id}`;
+   }
 }

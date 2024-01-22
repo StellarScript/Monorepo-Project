@@ -1,12 +1,10 @@
-import type { Construct } from 'constructs';
-import type { StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import type { FargateService } from 'aws-cdk-lib/aws-ecs';
 import type {
    ApplicationListener,
    ApplicationTargetGroup,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 
-import { Stack } from 'aws-cdk-lib';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
 import { Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
@@ -21,16 +19,16 @@ import { CodeBuildProject } from '@appify/construct/codebuild-project';
 import { TemplateAsset, TemplateType } from '@appify/construct/service.decorator';
 import { ImageTag } from '../pattern/constants';
 
-export interface EcsDeploymentPipelineStackProps extends StackProps {
+export interface EcsDeploymentPipelineStackProps {
    readonly fargateService: FargateService;
    readonly listener: ApplicationListener;
    readonly blueTargetGroup: ApplicationTargetGroup;
    readonly greenTargetGroup: ApplicationTargetGroup;
 }
 
-export class EcsDeploymentPipelineStack extends Stack {
+export class EcsDeploymentPipelineStack extends Construct {
    constructor(scope: Construct, id: string, props: EcsDeploymentPipelineStackProps) {
-      super(scope, id, { env: props.env });
+      super(scope, id);
 
       const clientSource = new Artifact('ClientSource');
       const serverSource = new Artifact('ServerSource');
@@ -51,7 +49,7 @@ export class EcsDeploymentPipelineStack extends Stack {
 
       const buildAction = new CodeBuildAction({
          actionName: 'Build',
-         input: new Artifact('SourceArtifact'),
+         input: new Artifact('ClientSource'),
          project: buildProject,
          outputs: [buildArtifact],
       });
@@ -135,7 +133,6 @@ function BuildSpecTemplate() {
             commands: [
                'sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" taskdef.json',
                'sed -i "s|REPOSITORY_URI|${REPOSITORY_URI}|g" taskdef.json',
-
                'sed -i "s|TASK_DEFINITION_ARN|${TASK_DEFINITION_ARN}|g" appspec.yaml',
 
                'cat appspec.yaml',

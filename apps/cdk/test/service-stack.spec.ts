@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
+import { App } from 'aws-cdk-lib';
 import { it, describe, beforeAll } from 'vitest';
 import { Template } from 'aws-cdk-lib/assertions';
-import { App } from 'aws-cdk-lib';
 import { EcsServiceStack } from '../src/stack/service';
 
 describe('Service Stack', () => {
@@ -11,18 +11,77 @@ describe('Service Stack', () => {
    beforeAll(() => {
       const app = new App();
       stack = new EcsServiceStack(app, 'service-stack', {
-         env: { account: '1234', region: 'us-east-2' },
+         env: { account: '123456789012', region: 'us-east-2' },
       });
    });
 
-   it('service cluster', () => {
+   it('service stack cluster', () => {
       const template = Template.fromStack(stack);
-      //   template.hasResourceProperties('AWS::EC2::VPC', {
-      //      CidrBlock: '10.0.0.0/16',
-      //      EnableDnsHostnames: true,
-      //      EnableDnsSupport: true,
-      //   });
+      template.hasResourceProperties('AWS::ECS::Cluster', {
+         ClusterSettings: [{ Name: 'containerInsights', Value: 'enabled' }],
+      });
+   });
 
-      console.log('------', template);
+   it('service stack task definition', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+         Family: 'appify',
+         NetworkMode: 'awsvpc',
+         RequiresCompatibilities: ['FARGATE'],
+      });
+   });
+
+   it('service stack task definition', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::EC2::SecurityGroup', {
+         GroupDescription: 'Ecs Fargate Service Security Group',
+         SecurityGroupEgress: [
+            {
+               CidrIp: '0.0.0.0/0',
+               Description: 'Allow all outbound traffic by default',
+               IpProtocol: '-1',
+            },
+         ],
+         VpcId: 'vpc-12345',
+      });
+   });
+
+   it('service stack ecs service', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::ECS::Service', {
+         DeploymentConfiguration: { MaximumPercent: 200, MinimumHealthyPercent: 50 },
+         DeploymentController: { Type: 'CODE_DEPLOY' },
+         EnableECSManagedTags: false,
+         EnableExecuteCommand: true,
+         HealthCheckGracePeriodSeconds: 60,
+         LaunchType: 'FARGATE',
+         PropagateTags: 'TASK_DEFINITION',
+         TaskDefinition: 'appify',
+
+         LoadBalancers: [
+            {
+               ContainerName: 'client',
+               ContainerPort: 3000,
+            },
+            {
+               ContainerName: 'client',
+               ContainerPort: 3000,
+            },
+         ],
+         NetworkConfiguration: {
+            AwsvpcConfiguration: {
+               AssignPublicIp: 'DISABLED',
+            },
+         },
+      });
+   });
+
+   it('service stack ecs service', () => {
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
+         DefaultActions: [{ Type: 'forward' }],
+         Protocol: 'HTTPS',
+         Port: 443,
+      });
    });
 });

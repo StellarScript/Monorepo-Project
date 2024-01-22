@@ -21,8 +21,8 @@ import { SecurityGroupConstruct } from '@appify/construct/securityGroup';
 import { FargateServiceConstruct } from '@appify/construct/fargateService';
 import { TaskDefinitionConstruct } from '@appify/construct/taskDefinition';
 
-import { EcsDeploymentPipelineStack } from './pipeline';
 import { Containers, ImageTag } from '../pattern/constants';
+import { EcsDeploymentPipelineStack } from '../pattern/deployment.pipeline';
 import { ServiceStackPermssionBoundary } from '../pattern/service.boundary';
 
 export class EcsServiceStack extends Stack {
@@ -48,8 +48,8 @@ export class EcsServiceStack extends Stack {
        * Existing Resources
        */
       this.vpc = VpcConstruct.vpcLookup(this, 'vpc-lookup');
+      this.alb = AlbConstruct.albLookup(this, 'alb-lookup');
       this.albSG = SecurityGroupConstruct.securityGroupLookup(this, 'securitygroup-lookup');
-      this.alb = AlbConstruct.albLookup(this, 'alb-lookup', this.albSG.securityGroupId);
       this.certificate = Certificate.fromCertificateArn(this, 'cert-lookup', config.inf.certificateArn);
 
       /**

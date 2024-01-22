@@ -26,7 +26,7 @@ export function TaskDefinitionDescriptor() {
    };
 }
 
-export function containerDescriptor() {
+export function ContainerDescriptor() {
    return function <T extends { new (...args: any[]): Container }>(constructor: T) {
       return class extends constructor {
          constructor(...args: any[]) {
