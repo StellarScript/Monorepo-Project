@@ -9,7 +9,7 @@ import { StackDescriptor } from '@appify/construct/service.decorator';
 import { ResourceStack } from '../stack/resource';
 import { EcsServiceStack } from '../stack/service';
 
-StackDescriptor.register();
+StackDescriptor.init();
 
 const app = new App();
 const env = {
