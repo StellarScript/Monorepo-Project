@@ -1,16 +1,21 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ],
-  "compilerOptions": {
-    "esModuleInterop": true
-  }
+   "extends": "../../tsconfig.base.json",
+   "files": [],
+   "include": [],
+   "references": [
+      {
+         "path": "./tsconfig.app.json"
+      },
+      {
+         "path": "./tsconfig.spec.json"
+      }
+   ],
+   "compilerOptions": {
+      "esModuleInterop": true,
+      "paths": {
+         "@appify/shared/*": ["libs/shared/src/*"],
+         "@modules/*": ["apps/server/src/modules/*"],
+         "@providers/*": ["apps/server/src/providers/*"]
+      }
+   }
 }
