@@ -5,7 +5,7 @@ export * from './template-asset';
 export * from './service.decorators';
 
 export class StackDescriptor {
-   public static register(): void {
+   public static init(): void {
       container.resolve(TemplateSchema);
    }
 }
