@@ -6,17 +6,19 @@
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "strict": true,
+      "allowImportingTsExtensions": true,
       "forceConsistentCasingInFileNames": true,
       "noEmit": true,
       "resolveJsonModule": true,
       "isolatedModules": true,
       "incremental": true,
-      "plugins": [
-         {
-            "name": "next"
-         }
-      ],
-      "types": ["vitest", "node"]
+      "plugins": [{ "name": "next" }],
+      "types": ["node"],
+      "paths": {
+         "@styles/*": ["apps/client/styles/*"],
+         "@providers/*": ["apps/client/providers/*"],
+         "@components/*": ["apps/client/components/*"]
+      }
    },
    "include": [
       "**/*.ts",
